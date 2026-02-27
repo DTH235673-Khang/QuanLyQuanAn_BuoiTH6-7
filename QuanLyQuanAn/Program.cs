@@ -15,5 +15,6 @@ namespace QuanLyQuanAn
             ApplicationConfiguration.Initialize();
             Application.Run(new frmHoaDon());
         }
+
     }
 }
