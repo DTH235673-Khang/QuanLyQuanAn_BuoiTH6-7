@@ -45,6 +45,7 @@
             btnThoat = new Button();
             btnTimKiem = new Button();
             btnXuat = new Button();
+            btnNhap = new Button();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridView).BeginInit();
             SuspendLayout();
@@ -129,7 +130,7 @@
             // btnInHoaDon
             // 
             btnInHoaDon.ForeColor = Color.Black;
-            btnInHoaDon.Location = new Point(205, 226);
+            btnInHoaDon.Location = new Point(147, 226);
             btnInHoaDon.Name = "btnInHoaDon";
             btnInHoaDon.Size = new Size(103, 29);
             btnInHoaDon.TabIndex = 2;
@@ -139,7 +140,7 @@
             // btnSua
             // 
             btnSua.ForeColor = Color.Black;
-            btnSua.Location = new Point(314, 226);
+            btnSua.Location = new Point(256, 226);
             btnSua.Name = "btnSua";
             btnSua.Size = new Size(75, 29);
             btnSua.TabIndex = 3;
@@ -150,7 +151,7 @@
             // btnXoa
             // 
             btnXoa.ForeColor = Color.Red;
-            btnXoa.Location = new Point(395, 226);
+            btnXoa.Location = new Point(337, 226);
             btnXoa.Name = "btnXoa";
             btnXoa.Size = new Size(75, 29);
             btnXoa.TabIndex = 4;
@@ -161,7 +162,7 @@
             // btnThoat
             // 
             btnThoat.ForeColor = Color.Black;
-            btnThoat.Location = new Point(476, 226);
+            btnThoat.Location = new Point(418, 226);
             btnThoat.Name = "btnThoat";
             btnThoat.Size = new Size(75, 29);
             btnThoat.TabIndex = 5;
@@ -171,7 +172,7 @@
             // btnTimKiem
             // 
             btnTimKiem.ForeColor = Color.Black;
-            btnTimKiem.Location = new Point(557, 226);
+            btnTimKiem.Location = new Point(499, 226);
             btnTimKiem.Name = "btnTimKiem";
             btnTimKiem.Size = new Size(105, 29);
             btnTimKiem.TabIndex = 6;
@@ -181,18 +182,31 @@
             // btnXuat
             // 
             btnXuat.ForeColor = Color.Black;
-            btnXuat.Location = new Point(668, 226);
+            btnXuat.Location = new Point(610, 226);
             btnXuat.Name = "btnXuat";
             btnXuat.Size = new Size(105, 29);
             btnXuat.TabIndex = 7;
             btnXuat.Text = "Xuất Excel...";
             btnXuat.UseVisualStyleBackColor = true;
+            btnXuat.Click += btnXuat_Click;
+            // 
+            // btnNhap
+            // 
+            btnNhap.ForeColor = Color.Black;
+            btnNhap.Location = new Point(721, 226);
+            btnNhap.Name = "btnNhap";
+            btnNhap.Size = new Size(105, 29);
+            btnNhap.TabIndex = 8;
+            btnNhap.Text = "Nhập";
+            btnNhap.UseVisualStyleBackColor = true;
+            btnNhap.Click += btnNhap_Click;
             // 
             // frmHoaDon
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(961, 270);
+            Controls.Add(btnNhap);
             Controls.Add(btnXuat);
             Controls.Add(btnTimKiem);
             Controls.Add(btnThoat);
@@ -225,5 +239,6 @@
         private Button btnThoat;
         private Button btnTimKiem;
         private Button btnXuat;
+        private Button btnNhap;
     }
 }

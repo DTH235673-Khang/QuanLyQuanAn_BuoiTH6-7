@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,11 +12,21 @@ namespace QuanLyQuanAn.Data
     {
         public int ID { get; set; }
         public string TenNguyenLieu { get; set; }
-        public string DonViTinh { get; set; }
+        public string QuyCach { get; set; }
         public int SoLuongTon { get; set; }
-        public int GiaNhap { get; set; }
+        public decimal GiaNhap { get; set; }
         public virtual ObservableCollectionListSource<PhieuNhapKho_ChiTiet> PhieuNhapKho_ChiTiet { get; } = new();
 
     }
+    [NotMapped]
+    public class DanhSachNguyenLieu
+    {
+        public int ID { get; set; }
+        public string TenNguyenLieu { get; set; }
+        public string QuyCach { get; set; }
+        public int SoLuongTon { get; set; }
+        public decimal GiaNhap { get; set; }
+    }
+
 }
 

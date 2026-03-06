@@ -11,48 +11,47 @@ using ClosedXML.Excel;
 using Microsoft.IdentityModel.Tokens;
 using QuanLyQuanAn.Data;
 using static QuanLyQuanAn.Data.HoaDon;
+using static QuanLyQuanAn.Data.PhieuNhapKho;
 
 namespace QuanLyQuanAn.Forms
 {
-    public partial class frmHoaDon : Form
+    public partial class frmPhieuNhapKho : Form
     {
         QLQADbContext context = new QLQADbContext(); // Khởi tạo biến ngữ cảnh CSDL
         int id; // Lấy mã hóa đơn (dùng cho Sửa và Xóa)
-        public frmHoaDon()
+        public frmPhieuNhapKho()
         {
             InitializeComponent();
-
         }
 
-        private void frmHoaDon_Load(object sender, EventArgs e)
+        private void frmPhieuNhapKho_Load(object sender, EventArgs e)
         {
             dataGridView.AutoGenerateColumns = false;
-            List<DanhSachHoaDon> hd = new List<DanhSachHoaDon>();
-            hd = context.HoaDon.Select(r => new DanhSachHoaDon
+            List<DanhSachPhieuNhapKho> p = new List<DanhSachPhieuNhapKho>();
+            p = context.PhieuNhapKho.Select(r => new DanhSachPhieuNhapKho
             {
                 ID = r.ID,
                 NhanVienID = r.NhanVienID,
                 HoVaTenNhanVien = r.NhanVien.HoVaTen,
-                KhachHangID = r.KhachHangID,
-                HoVaTenKhachHang = r.KhachHang.HoVaTen,
-                BanID = r.BanID,
-                NgayLap = r.NgayLap,
-                GhiChuHoaDon = r.GhiChuHoaDon,
-                TongTienHoaDon =(double) r.TongTien,
+                NhaCungCapID = r.NhaCungCapID,
+                TenNhaCungCap = r.NhaCungCap.TenNhaCungCap,
+                NgayNhap = r.NgayNhap,
+                TongTien = r.TongTien,
+                TrangThai = r.TrangThai,
+                GhiChu = r.GhiChu,
                 XemChiTiet = "Xem chi tiết"
             }).ToList();
-            dataGridView.DataSource = hd;
+            dataGridView.DataSource = p;
+
         }
-
-
 
         private void btnSua_Click(object sender, EventArgs e)
         {
             id = Convert.ToInt32(dataGridView.CurrentRow.Cells["ID"].Value.ToString());
-            using (frmHoaDon_ChiTiet chiTiet = new frmHoaDon_ChiTiet(id))
+            using (frmPhieuNhapKho_ChiTiet chiTiet = new frmPhieuNhapKho_ChiTiet(id))
             {
                 chiTiet.ShowDialog();
-                frmHoaDon_Load(sender, e);
+                frmPhieuNhapKho_Load(sender, e);
             }
         }
 
@@ -61,23 +60,32 @@ namespace QuanLyQuanAn.Forms
             id = Convert.ToInt32(dataGridView.CurrentRow.Cells["ID"].Value.ToString());
             if (id.ToString().IsNullOrEmpty())
             {
-                MessageBox.Show("Vui lòng chọn hóa đơn càn xóa!", "Thông báo", MessageBoxButtons.OK);
+                MessageBox.Show("Vui lòng chọn phiếu nhập kho càn xóa!", "Thông báo", MessageBoxButtons.OK);
             }
             else
             {
-                if (MessageBox.Show("Xác nhận xóa hóa đơn " + id + "?", "Xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                if (MessageBox.Show("Xác nhận xóa phiếu nhập kho " + id + "?", "Xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     id = Convert.ToInt32(dataGridView.CurrentRow.Cells["ID"].Value.ToString());
-                    HoaDon t = context.HoaDon.Find(id);
+                    PhieuNhapKho t = context.PhieuNhapKho.Find(id);
                     if (t != null)
                     {
-                        context.HoaDon.Remove(t);
+                        context.PhieuNhapKho.Remove(t);
                     }
                     context.SaveChanges();
-                    frmHoaDon_Load(sender, e);
+                    frmPhieuNhapKho_Load(sender, e);
                 }
             }
+        }
 
+        private void btnTaoPhieu_Click(object sender, EventArgs e)
+        {
+            using (frmPhieuNhapKho_ChiTiet chitiet = new frmPhieuNhapKho_ChiTiet())
+            {
+                chitiet.ShowDialog();
+                context.SaveChanges();
+                frmPhieuNhapKho_Load(sender, e);
+            }
         }
 
         private void btnNhap_Click(object sender, EventArgs e)
@@ -112,40 +120,39 @@ namespace QuanLyQuanAn.Forms
                         int thatbai = 0;
                         if (table1.Rows.Count > 0)
                         {
-                           
+
                             foreach (DataRow r in table1.Rows)
                             {
                                 try
                                 {
                                     var nv = context.NhanVien.FirstOrDefault(x => x.HoVaTen == r["NhanVien"].ToString());
-                                    var kh = context.KhachHang.FirstOrDefault(x => x.HoVaTen == r["KhachHang"].ToString());
-                                    var ban = context.Ban.FirstOrDefault(x => x.TenBan == r["Ban"].ToString());
-                                    DateTime dt = Convert.ToDateTime(r["NgayLap"]);
-                                    string ghichu= r["GhiChuHoaDon"].ToString();
+                                    var ncc = context.NhaCungCap.FirstOrDefault(x => x.TenNhaCungCap == r["NhaCungCap"].ToString());
+                                    DateTime dt = Convert.ToDateTime(r["NgayNhap"]);
+                                    string tthai = r["TrangThai"].ToString();
+                                    string ghichu = r["GhiChu"].ToString();
                                     double tongtien = Convert.ToDouble(r["TongTien"]);
-                                    if(nv==null||kh==null||ban==null||dt==null||tongtien<=0)
+                                    if (nv == null || ncc == null || tthai.IsNullOrEmpty() || dt == null || tongtien <= 0)
                                     {
                                         throw new Exception("Không lấy được dữ liệu");
                                     }
-                                    if (nv != null && kh != null && ban!=null)
+                                    if (nv != null && ncc != null)
                                     {
-                                        HoaDon hd = new HoaDon();
-                                        hd.NhanVienID = nv.ID;
-                                        hd.KhachHangID = kh.ID;
-                                        hd.NgayLap = dt;
-                                        hd.GhiChuHoaDon = ghichu;
-                                        hd.TongTien = (decimal)tongtien;
-                                        hd.BanID = ban.ID;
-                                        context.HoaDon.Add(hd);
+                                        PhieuNhapKho p = new PhieuNhapKho();
+                                        p.NhanVienID = nv.ID;
+                                        p.NhaCungCapID = ncc.ID;
+                                        p.NgayNhap = dt;
+                                        p.GhiChu = ghichu;
+                                        p.TongTien = tongtien;
+                                        p.TrangThai = tthai;
+                                        context.PhieuNhapKho.Add(p);
                                         context.SaveChanges();
                                         thanhcong++;
                                     }
                                 }
-                                catch(Exception ex)
+                                catch (Exception ex)
                                 {
                                     thatbai++;
                                     MessageBox.Show("Lỗi: " + ex.Message, "Thông báo lỗi");
-
                                 }
 
                             }
@@ -174,32 +181,32 @@ namespace QuanLyQuanAn.Forms
                             {
                                 try
                                 {
-                                    string tenTA = r2["TenThucAn"].ToString();
-                                    var t = context.ThucAn.FirstOrDefault(x => x.TenThucAn == tenTA);
+                                    string tenNL = r2["NguyenLieu"].ToString();
+                                    var n = context.NguyenLieu.FirstOrDefault(x => x.TenNguyenLieu == tenNL);
 
-                                    if (t != null)
+                                    if (n != null)
                                     {
-                                        HoaDon_ChiTiet ct = new HoaDon_ChiTiet();
-                                        ct.HoaDonID = Convert.ToInt32(r2["ID"]); // Cột liên kết trong Excel
-                                        ct.ThucAnID = t.ID;
-                                        ct.SoLuongBan = Convert.ToInt32(r2["SoLuong"]);
-                                        ct.DonGiaBan = Convert.ToInt32(r2["DonGia"]);
-                                        context.HoaDon_ChiTiet.Add(ct);
+                                        PhieuNhapKho_ChiTiet ct = new PhieuNhapKho_ChiTiet();
+                                        ct.PhieuNhapKhoID = Convert.ToInt32(r2["ID"]); // Cột liên kết trong Excel
+                                        ct.NguyenLieuID = n.ID;
+                                        ct.SoLuongNhap = Convert.ToInt32(r2["SoLuongNhap"]);
+                                        ct.GiaNhap = Convert.ToInt32(r2["GiaNhap"]);
+                                        context.PhieuNhapKho_ChiTiet.Add(ct);
                                         context.SaveChanges();
                                     }
                                 }
-                                catch
+                                catch (Exception ex)
                                 {
-
+                                    MessageBox.Show("Lỗi: " + ex.Message, "Thông báo lỗi");
                                 }
-                               
+
                             }
                             context.SaveChanges();
                         }
 
                         MessageBox.Show(string.Format("Kết quả nhập dữ liệu:\n- Thành công: {0}\n- Thất bại: {1}", thanhcong, thatbai),
                                         "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        frmHoaDon_Load(sender, e);
+                        frmPhieuNhapKho_Load(sender, e);
                     }
                 }
                 catch (Exception ex)
@@ -214,7 +221,7 @@ namespace QuanLyQuanAn.Forms
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Title = "Xuất dữ liệu ra tập tin Excel";
             saveFileDialog.Filter = "Tập tin Excel|*.xls;*.xlsx";
-            saveFileDialog.FileName = "BaoCaoHoaDon_" + DateTime.Now.ToShortDateString().Replace("/", "_") + ".xlsx";
+            saveFileDialog.FileName = "PhieuNhapKho_" + DateTime.Now.ToShortDateString().Replace("/", "_") + ".xlsx";
 
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
@@ -225,22 +232,22 @@ namespace QuanLyQuanAn.Forms
                     tableHD.Columns.AddRange(new DataColumn[] {
                 new DataColumn("ID", typeof(int)),
                 new DataColumn("NhanVien", typeof(string)),
-                new DataColumn("KhachHang", typeof(string)),
-                new DataColumn("NgayLap", typeof(DateTime)),
-                new DataColumn("GhiChuHoaDon", typeof(string)),
-                new DataColumn("Ban", typeof(string)),
+                new DataColumn("NhaCungCap", typeof(string)),
+                new DataColumn("NgayNhap", typeof(DateTime)),
+                new DataColumn("GhiChu", typeof(string)),
+                new DataColumn("TrangThai",typeof(string)),
                 new DataColumn("TongTien",typeof(decimal))
+
             });
 
-                    var dsHoaDon = context.HoaDon.ToList();
-                    if (dsHoaDon != null)
+                    var dsPhieuNhapKho = context.PhieuNhapKho.ToList();
+                    if (dsPhieuNhapKho != null)
                     {
-                        foreach (var p in dsHoaDon)
+                        foreach (var p in dsPhieuNhapKho)
                         {
                             var nv = context.NhanVien.FirstOrDefault(r => r.ID == p.NhanVienID);
-                            var kh = context.KhachHang.FirstOrDefault(r => r.ID == p.KhachHangID);
-                            var ban=context.Ban.FirstOrDefault(r => r.ID==p.BanID);
-                            tableHD.Rows.Add(p.ID, nv.HoVaTen, kh.HoVaTen, p.NgayLap, p.GhiChuHoaDon,ban.TenBan, p.TongTien);
+                            var ncc = context.NhaCungCap.FirstOrDefault(r => r.ID == p.NhaCungCapID);
+                            tableHD.Rows.Add(p.ID, nv.HoVaTen, ncc.TenNhaCungCap, p.NgayNhap, p.GhiChu,p.TrangThai, p.TongTien);
                         }
                     }
 
@@ -248,18 +255,18 @@ namespace QuanLyQuanAn.Forms
                     DataTable tableCT = new DataTable();
                     tableCT.Columns.AddRange(new DataColumn[] {
                 new DataColumn("ID", typeof(int)),
-                new DataColumn("ThucAn", typeof(string)),
-                new DataColumn("SoLuong", typeof(int)),
-                new DataColumn("DonGia", typeof(int))
+                new DataColumn("NguyenLieu", typeof(string)),
+                new DataColumn("SoLuongNhap", typeof(int)),
+                new DataColumn("GiaNhap", typeof(int))
             });
 
-                    var dsChiTiet = context.HoaDon_ChiTiet.ToList();
+                    var dsChiTiet = context.PhieuNhapKho_ChiTiet.ToList();
                     if (dsChiTiet != null)
                     {
                         foreach (var d in dsChiTiet)
                         {
-                            var t = context.ThucAn.FirstOrDefault(r => r.ID == d.ThucAnID);
-                            tableCT.Rows.Add(d.HoaDonID, t.TenThucAn, d.SoLuongBan, d.DonGiaBan);
+                            var t = context.NguyenLieu.FirstOrDefault(r => r.ID == d.NguyenLieuID);
+                            tableCT.Rows.Add(d.PhieuNhapKhoID, t.TenNguyenLieu, d.SoLuongNhap, d.GiaNhap);
                         }
                     }
 
@@ -288,3 +295,5 @@ namespace QuanLyQuanAn.Forms
 }
     
 
+
+    

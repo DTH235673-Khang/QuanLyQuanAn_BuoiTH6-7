@@ -12,7 +12,7 @@ using QuanLyQuanAn.Data;
 namespace QuanLyQuanAn.Migrations
 {
     [DbContext(typeof(QLQADbContext))]
-    [Migration("20260304062335_KhoiTaoCSDL")]
+    [Migration("20260306110631_KhoiTaoCSDL")]
     partial class KhoiTaoCSDL
     {
         /// <inheritdoc />
@@ -183,12 +183,12 @@ namespace QuanLyQuanAn.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
-                    b.Property<string>("DonViTinh")
+                    b.Property<decimal>("GiaNhap")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("QuyCach")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("GiaNhap")
-                        .HasColumnType("int");
 
                     b.Property<int>("SoLuongTon")
                         .HasColumnType("int");
@@ -269,6 +269,9 @@ namespace QuanLyQuanAn.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
+                    b.Property<string>("GhiChu")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("NgayNhap")
                         .HasColumnType("datetime2");
 
@@ -277,6 +280,13 @@ namespace QuanLyQuanAn.Migrations
 
                     b.Property<int>("NhanVienID")
                         .HasColumnType("int");
+
+                    b.Property<double>("TongTien")
+                        .HasColumnType("float");
+
+                    b.Property<string>("TrangThai")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
 

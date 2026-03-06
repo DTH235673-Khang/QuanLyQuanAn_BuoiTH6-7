@@ -13,12 +13,13 @@ using QuanLyQuanAn.Data;
 
 namespace QuanLyQuanAn.Forms
 {
-    public partial class frmKhachHang : Form
+    public partial class frmNguyenLieu : Form
     {
         QLQADbContext context = new QLQADbContext(); // Khởi tạo biến ngữ cảnh CSDL
         bool xuLyThem = false; // Kiểm tra có nhấn vào nút Thêm hay không?
-        int id;
-        public frmKhachHang()
+        int id; // Lấy mã sản phẩm (dùng cho Sửa và Xóa)
+
+        public frmNguyenLieu()
         {
             InitializeComponent();
         }
@@ -26,29 +27,41 @@ namespace QuanLyQuanAn.Forms
         {
             btnLuu.Enabled = giaTri;
             btnHuyBo.Enabled = giaTri;
-            txtHoVaTen.Enabled = giaTri;
-            txtDienThoai.Enabled = giaTri;
-            txtDiaChi.Enabled = giaTri;
+            cboQuyCach.Enabled = giaTri;
+            txtTenNguyenLieu.Enabled = giaTri;
+            numSoLuongTon.Enabled = giaTri;
+            numGiaNhap.Enabled = giaTri;
             btnThem.Enabled = !giaTri;
             btnSua.Enabled = !giaTri;
             btnXoa.Enabled = !giaTri;
-            btnTimKiem.Enabled = !giaTri;
-            btnNhap.Enabled = !giaTri;
-            btnXuat.Enabled = !giaTri;
+            btnTimKiem.Enabled = giaTri;
+
         }
-        private void frmKhachHang_Load(object sender, EventArgs e)
+
+        private void frmNguyenLieu_Load(object sender, EventArgs e)
         {
             BatTatChucNang(false);
-            List<KhachHang> kh = new List<KhachHang>();
-            kh = context.KhachHang.ToList();
+            dataGridView.AutoGenerateColumns = false;
+            List<DanhSachNguyenLieu> sp = new List<DanhSachNguyenLieu>();
+            sp = context.NguyenLieu.Select(r => new DanhSachNguyenLieu
+            {
+                ID = r.ID,
+                TenNguyenLieu = r.TenNguyenLieu,
+                QuyCach = r.QuyCach,
+                GiaNhap = r.GiaNhap,
+                SoLuongTon = r.SoLuongTon
+            }).ToList();
             BindingSource bindingSource = new BindingSource();
-            bindingSource.DataSource = kh;
-            txtHoVaTen.DataBindings.Clear();
-            txtHoVaTen.DataBindings.Add("Text", bindingSource, "HoVaTen", false, DataSourceUpdateMode.Never);
-            txtDiaChi.DataBindings.Clear();
-            txtDiaChi.DataBindings.Add("Text", bindingSource, "DiaChi", false, DataSourceUpdateMode.Never);
-            txtDienThoai.DataBindings.Clear();
-            txtDienThoai.DataBindings.Add("Text", bindingSource, "DienThoai", false, DataSourceUpdateMode.Never);
+            bindingSource.DataSource = sp;
+            txtTenNguyenLieu.DataBindings.Clear();
+            txtTenNguyenLieu.DataBindings.Add("Text", bindingSource, "TenNguyenLieu", false, DataSourceUpdateMode.Never);
+            numSoLuongTon.DataBindings.Clear();
+            numSoLuongTon.DataBindings.Add("Value", bindingSource, "SoLuongTon", false, DataSourceUpdateMode.Never);
+
+            numGiaNhap.DataBindings.Clear();
+            numGiaNhap.DataBindings.Add("Value", bindingSource, "GiaNhap", false, DataSourceUpdateMode.Never);
+            cboQuyCach.DataBindings.Clear();
+            cboQuyCach.DataBindings.Add("Text", bindingSource, "QuyCach", false, DataSourceUpdateMode.Never);
             dataGridView.DataSource = bindingSource;
         }
 
@@ -56,9 +69,10 @@ namespace QuanLyQuanAn.Forms
         {
             xuLyThem = true;
             BatTatChucNang(true);
-            txtHoVaTen.Clear();
-            txtDienThoai.Clear();
-            txtDiaChi.Clear();
+            cboQuyCach.Text = "";
+            txtTenNguyenLieu.Clear();
+            numSoLuongTon.Value = 0;
+            numGiaNhap.Value = 0;
         }
 
         private void btnSua_Click(object sender, EventArgs e)
@@ -70,69 +84,68 @@ namespace QuanLyQuanAn.Forms
 
         private void btnXoa_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("Xác nhận xóa khách hàng " + txtHoVaTen.Text + "?", "Xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (MessageBox.Show("Xác nhận xóa nguyên liệu " + txtTenNguyenLieu.Text + "?", "Xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 id = Convert.ToInt32(dataGridView.CurrentRow.Cells["ID"].Value.ToString());
-                KhachHang kh = context.KhachHang.Find(id);
-                if (kh != null)
+                NguyenLieu t = context.NguyenLieu.Find(id);
+                if (t != null)
                 {
-                    context.KhachHang.Remove(kh);
+                    context.NguyenLieu.Remove(t);
                 }
                 context.SaveChanges();
-                frmKhachHang_Load(sender, e);
+                frmNguyenLieu_Load(sender, e);
             }
         }
 
         private void btnLuu_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtHoVaTen.Text))
-                MessageBox.Show("Vui lòng nhập họ và tên khách hàng?", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            if (string.IsNullOrWhiteSpace(txtTenNguyenLieu.Text))
+                MessageBox.Show("Vui lòng nhập tên nguyên liệu.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            else if (string.IsNullOrWhiteSpace(cboQuyCach.Text))
+                MessageBox.Show("Vui lòng chọn quy cách.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            else if (numSoLuongTon.Value < 0)
+                MessageBox.Show("Số lượng tồn phải lớn hơn hoặc bằng 0", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            else if (numGiaNhap.Value <= 0)
+                MessageBox.Show("Giá nhập phải lớn hơn 0.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             else
             {
                 if (xuLyThem)
                 {
-                    KhachHang kh = new KhachHang();
-                    kh.HoVaTen = txtHoVaTen.Text;
-                    kh.DienThoai = txtDienThoai.Text;
-                    kh.DiaChi = txtDiaChi.Text;
-                    context.KhachHang.Add(kh);
+                    NguyenLieu t = new NguyenLieu();
+                    t.TenNguyenLieu = txtTenNguyenLieu.Text;
+                    t.GiaNhap = numGiaNhap.Value;
+                    t.SoLuongTon = Convert.ToInt32(numSoLuongTon.Value);
+                    t.QuyCach = cboQuyCach.Text;
+                    context.NguyenLieu.Add(t);
                     context.SaveChanges();
+
                 }
                 else
                 {
-                    KhachHang kh = context.KhachHang.Find(id);
-                    if (kh != null)
+                    var t = context.NguyenLieu.Find(id);
+                    if (t != null)
                     {
-                        kh.HoVaTen = txtHoVaTen.Text;
-                        kh.DienThoai = txtDienThoai.Text;
-                        kh.DiaChi = txtDiaChi.Text;
-                        context.KhachHang.Update(kh);
+                        t.TenNguyenLieu = txtTenNguyenLieu.Text;
+                        t.GiaNhap = numGiaNhap.Value;
+                        t.SoLuongTon = Convert.ToInt32(numSoLuongTon.Value);
+                        t.QuyCach = cboQuyCach.Text;
+
+                        context.NguyenLieu.Update(t);
                         context.SaveChanges();
                     }
                 }
-                frmKhachHang_Load(sender, e);
+                frmNguyenLieu_Load(sender, e);
             }
         }
 
         private void btnHuyBo_Click(object sender, EventArgs e)
         {
-            frmKhachHang_Load(sender, e);
+            frmNguyenLieu_Load(sender, e);
         }
 
         private void btnThoat_Click(object sender, EventArgs e)
         {
             this.Close();
-        }
-
-        private void btnTimKiem_Click(object sender, EventArgs e)
-        {
-            if (string.IsNullOrWhiteSpace(txtHoVaTen.Text))
-                MessageBox.Show("Vui lòng nhập họ và tên khách hàng?", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            else
-            {
-                dataGridView.DataSource = context.KhachHang.Where(kh => kh.HoVaTen.Contains(txtHoVaTen.Text)).ToList();
-                BatTatChucNang(true);
-            }
         }
 
         private void btnNhap_Click(object sender, EventArgs e)
@@ -174,51 +187,52 @@ namespace QuanLyQuanAn.Forms
                         }
                         if (table.Rows.Count > 0)
                         {
-                            int thanhCong = 0;
-                            int thatBai = 0;
-
+                            int thanhcong = 0;
+                            int thatbai = 0;
                             foreach (DataRow r in table.Rows)
                             {
                                 try
                                 {
-                                    string ten = r["HoVaTen"].ToString();
-                                    string diachi = r["DiaChi"].ToString();
-                                    string dienthoai = r["DienThoai"].ToString();
-                                    if (ten.IsNullOrEmpty() || diachi.IsNullOrEmpty() || dienthoai.IsNullOrEmpty())
+                                    string ten = r["TenNguyenLieu"].ToString();
+                                    string quycach = r["Quycach"].ToString();
+                                    int g = Convert.ToInt32(r["GiaNhap"]);
+                                    int s = Convert.ToInt32(r["SoLuongTon"]);
+                                    if (ten.IsNullOrEmpty() || g <= 0 || s <= 0)
                                     {
                                         throw new Exception("");
                                     }
-                                    KhachHang kh = new KhachHang();
-                                    kh.HoVaTen = ten;
-                                    kh.DienThoai = dienthoai;
-                                    kh.DiaChi = diachi;
-
-                                    context.KhachHang.Add(kh);
-                                    context.SaveChanges(); // Lưu ngay từng dòng để bắt lỗi chính xác dòng đó
-                                    thanhCong++;
+                                    NguyenLieu t = new NguyenLieu();
+                                    t.TenNguyenLieu = ten;
+                                    t.QuyCach = quycach;
+                                    t.GiaNhap = g;
+                                    t.SoLuongTon =s;
+                                    context.NguyenLieu.Add(t);
+                                    context.SaveChanges();
+                                    thanhcong++;
                                 }
                                 catch
                                 {
-                                    // Nếu dòng này lỗi, rollback entry đó và tăng biến thất bại
-                                    thatBai++;
-                                    // Tùy chọn: Log lỗi hoặc bỏ qua để tiếp tục dòng sau
+                                    thatbai++;
                                 }
+
                             }
 
-                            MessageBox.Show(string.Format("Kết quả nhập dữ liệu:\n- Thành công: {0}\n- Thất bại: {1}", thanhCong, thatBai),
+                            context.SaveChanges();
+                            MessageBox.Show(string.Format("Kết quả nhập dữ liệu:\n- Thành công: {0}\n- Thất bại: {1}", thanhcong, thatbai),
                                             "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                            frmKhachHang_Load(sender, e);
+                            frmNguyenLieu_Load(sender, e);
                         }
                         if (firstRow)
                             MessageBox.Show("Tập tin Excel rỗng.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     }
                 }
+
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 }
             }
+
         }
 
         private void btnXuat_Click(object sender, EventArgs e)
@@ -226,26 +240,29 @@ namespace QuanLyQuanAn.Forms
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Title = "Xuất dữ liệu ra tập tin Excel";
             saveFileDialog.Filter = "Tập tin Excel|*.xls;*.xlsx";
-            saveFileDialog.FileName = "KhachHang_" + DateTime.Now.ToShortDateString().Replace("/", "_") + ".xlsx";
+            saveFileDialog.FileName = "NguyenLieu_" + DateTime.Now.ToShortDateString().Replace("/", "_") + ".xlsx";
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
                 try
                 {
                     DataTable table = new DataTable();
-                    table.Columns.AddRange(new DataColumn[4] {
-                    new DataColumn("ID", typeof(int)),
-                    new DataColumn("HoVaTen", typeof(string)),
-                    new DataColumn("DienThoai", typeof(string)),
-                    new DataColumn("DiaChi", typeof(string))});
-                    var khachHang = context.KhachHang.ToList();
-                    if (khachHang != null)
+                    table.Columns.AddRange(new DataColumn[5] {
+                        new DataColumn("ID", typeof(int)),
+                        new DataColumn("TenNguyenLieu", typeof(string)),
+                        new DataColumn("QuyCach", typeof(string)),
+                        new DataColumn("GiaNhap", typeof(int)),
+                        new DataColumn("SoLuongTon", typeof(int))});
+                    var nguyenLieu = context.NguyenLieu.ToList();
+                    if (nguyenLieu != null)
                     {
-                        foreach (var p in khachHang)
-                            table.Rows.Add(p.ID, p.HoVaTen, p.DienThoai, p.DiaChi);
+                        foreach (var p in nguyenLieu)
+                        {
+                            table.Rows.Add(p.ID, p.TenNguyenLieu, p.QuyCach, p.GiaNhap, p.SoLuongTon);
+                        }
                     }
                     using (XLWorkbook wb = new XLWorkbook())
                     {
-                        var sheet = wb.Worksheets.Add(table, "KhachHang");
+                        var sheet = wb.Worksheets.Add(table, "NguyenLieu");
                         sheet.Columns().AdjustToContents();
                         wb.SaveAs(saveFileDialog.FileName);
                         MessageBox.Show("Đã xuất dữ liệu ra tập tin Excel thành công.", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);

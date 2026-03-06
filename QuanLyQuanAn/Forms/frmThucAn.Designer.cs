@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             groupBox1 = new GroupBox();
             btnXoaAnh = new Button();
             btnXoayAnh = new Button();
@@ -62,6 +62,8 @@
             Gia = new DataGridViewTextBoxColumn();
             TrangThai = new DataGridViewTextBoxColumn();
             HinhAnh = new DataGridViewImageColumn();
+            btnNhap = new Button();
+            btnXuat = new Button();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)picHinhAnh).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numDonGia).BeginInit();
@@ -71,6 +73,8 @@
             // 
             // groupBox1
             // 
+            groupBox1.Controls.Add(btnXuat);
+            groupBox1.Controls.Add(btnNhap);
             groupBox1.Controls.Add(btnXoaAnh);
             groupBox1.Controls.Add(btnXoayAnh);
             groupBox1.Controls.Add(btnDoiAnh);
@@ -133,7 +137,7 @@
             // 
             // btnTimKiem
             // 
-            btnTimKiem.Location = new Point(721, 191);
+            btnTimKiem.Location = new Point(626, 191);
             btnTimKiem.Name = "btnTimKiem";
             btnTimKiem.Size = new Size(94, 29);
             btnTimKiem.TabIndex = 19;
@@ -143,7 +147,7 @@
             // 
             // btnThoat
             // 
-            btnThoat.Location = new Point(621, 191);
+            btnThoat.Location = new Point(526, 191);
             btnThoat.Name = "btnThoat";
             btnThoat.Size = new Size(94, 29);
             btnThoat.TabIndex = 18;
@@ -153,7 +157,7 @@
             // 
             // btnHuyBo
             // 
-            btnHuyBo.Location = new Point(521, 191);
+            btnHuyBo.Location = new Point(426, 191);
             btnHuyBo.Name = "btnHuyBo";
             btnHuyBo.Size = new Size(94, 29);
             btnHuyBo.TabIndex = 17;
@@ -164,7 +168,7 @@
             // btnLuu
             // 
             btnLuu.ForeColor = Color.Blue;
-            btnLuu.Location = new Point(421, 191);
+            btnLuu.Location = new Point(326, 191);
             btnLuu.Name = "btnLuu";
             btnLuu.Size = new Size(94, 29);
             btnLuu.TabIndex = 16;
@@ -175,7 +179,7 @@
             // btnXoa
             // 
             btnXoa.ForeColor = Color.Red;
-            btnXoa.Location = new Point(321, 191);
+            btnXoa.Location = new Point(226, 191);
             btnXoa.Name = "btnXoa";
             btnXoa.Size = new Size(94, 29);
             btnXoa.TabIndex = 15;
@@ -185,7 +189,7 @@
             // 
             // btnSua
             // 
-            btnSua.Location = new Point(221, 193);
+            btnSua.Location = new Point(126, 193);
             btnSua.Name = "btnSua";
             btnSua.Size = new Size(94, 29);
             btnSua.TabIndex = 14;
@@ -195,7 +199,7 @@
             // 
             // btnThem
             // 
-            btnThem.Location = new Point(121, 193);
+            btnThem.Location = new Point(26, 193);
             btnThem.Name = "btnThem";
             btnThem.Size = new Size(94, 29);
             btnThem.TabIndex = 13;
@@ -370,9 +374,9 @@
             // Gia
             // 
             Gia.DataPropertyName = "Gia";
-            dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle3.Format = "N0";
-            Gia.DefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle2.Format = "N0";
+            Gia.DefaultCellStyle = dataGridViewCellStyle2;
             Gia.HeaderText = "Đơn giá";
             Gia.MinimumWidth = 6;
             Gia.Name = "Gia";
@@ -390,6 +394,26 @@
             HinhAnh.HeaderText = "Hình ảnh";
             HinhAnh.MinimumWidth = 6;
             HinhAnh.Name = "HinhAnh";
+            // 
+            // btnNhap
+            // 
+            btnNhap.Location = new Point(726, 191);
+            btnNhap.Name = "btnNhap";
+            btnNhap.Size = new Size(94, 29);
+            btnNhap.TabIndex = 23;
+            btnNhap.Text = "Nhập";
+            btnNhap.UseVisualStyleBackColor = true;
+            btnNhap.Click += btnNhap_Click;
+            // 
+            // btnXuat
+            // 
+            btnXuat.Location = new Point(826, 191);
+            btnXuat.Name = "btnXuat";
+            btnXuat.Size = new Size(94, 29);
+            btnXuat.TabIndex = 24;
+            btnXuat.Text = "Xuất";
+            btnXuat.UseVisualStyleBackColor = true;
+            btnXuat.Click += btnXuat_Click;
             // 
             // frmThucAn
             // 
@@ -445,5 +469,7 @@
         private DataGridViewTextBoxColumn Gia;
         private DataGridViewTextBoxColumn TrangThai;
         private DataGridViewImageColumn HinhAnh;
+        private Button btnXuat;
+        private Button btnNhap;
     }
 }

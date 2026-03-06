@@ -11,6 +11,8 @@ using System.Windows.Forms;
 using QuanLyQuanAn.Data;
 using System.Text;
 using System.Text.RegularExpressions;
+using ClosedXML.Excel;
+using Microsoft.IdentityModel.Tokens;
 
 
 
@@ -197,15 +199,14 @@ namespace QuanLyQuanAn.Forms
                     t.Gia = numDonGia.Value;
                     t.TrangThai = cboTrangThai.Text;
                     t.MoTa = txtMoTa.Text;
-                    string defaultImagePath = Path.Combine(Application.StartupPath, "hinhanh.jpg");
-                    t.HinhAnh = defaultImagePath;
+                    t.HinhAnh = "hinhanh.jpg";
                     t.DanhMucID = (int)cboPhanLoai.SelectedValue;
                     t.DonViTinhID = (int)cboDonViTinh.SelectedValue;
                     context.ThucAn.Add(t);
                     context.SaveChanges();
 
                 }
-                else 
+                else
                 {
                     var t = context.ThucAn.Find(id);
                     if (t != null)
@@ -415,7 +416,7 @@ namespace QuanLyQuanAn.Forms
                     MessageBox.Show("Lỗi: " + (ex.InnerException?.Message ?? ex.Message));
                 }
             }
-        
+
         }
         public string GenerateSlug(string phrase)
         {
@@ -439,5 +440,141 @@ namespace QuanLyQuanAn.Forms
 
             return str;
         }
-}
+
+        private void btnNhap_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Title = "Nhập dữ liệu từ tập tin Excel";
+            openFileDialog.Filter = "Tập tin Excel|*.xls;*.xlsx";
+            openFileDialog.Multiselect = false;
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    DataTable table = new DataTable();
+                    using (XLWorkbook workbook = new XLWorkbook(openFileDialog.FileName))
+                    {
+                        IXLWorksheet worksheet = workbook.Worksheet(1);
+                        bool firstRow = true;
+                        string readRange = "1:1";
+                        foreach (IXLRow row in worksheet.RowsUsed())
+                        {
+                            // Đọc dòng tiêu đề (dòng đầu tiên)
+                            if (firstRow)
+                            {
+                                readRange = string.Format("{0}:{1}", 1, row.LastCellUsed().Address.ColumnNumber);
+                                foreach (IXLCell cell in row.Cells(readRange))
+                                    table.Columns.Add(cell.Value.ToString());
+                                firstRow = false;
+                            }
+                            else // Đọc các dòng nội dung (các dòng tiếp theo)
+                            {
+                                table.Rows.Add();
+                                int cellIndex = 0;
+                                foreach (IXLCell cell in row.Cells(readRange))
+                                {
+                                    table.Rows[table.Rows.Count - 1][cellIndex] = cell.Value.ToString();
+                                    cellIndex++;
+                                }
+                            }
+                        }
+                        if (table.Rows.Count > 0)
+                        {
+                            int thanhcong = 0;
+                            int thatbai = 0;
+                            foreach (DataRow r in table.Rows)
+                            {
+                                try
+                                {
+                                    string dm = r["DanhMuc"].ToString();
+                                    string dvt = r["DonViTinh"].ToString();
+                                    var dm_ = context.DanhMuc.FirstOrDefault(r => r.TenDanhMuc == dm);
+                                    var dvt_ = context.DonViTinh.FirstOrDefault(r => r.TenDonViTinh == dvt);
+                                    string ten = r["TenThucAn"].ToString();
+                                    int d = Convert.ToInt32(r["Gia"]);
+                                    if (ten.IsNullOrEmpty()|| d<=0 || dm_==null||dvt_==null)
+                                    {
+                                        throw new Exception("");
+                                    }
+                                    ThucAn t = new ThucAn();
+                                    t.DanhMucID = dm_.Id;
+                                    t.DonViTinhID = dvt_.Id;
+                                    t.TenThucAn = ten;
+                                    t.Gia = d;
+                                    t.TrangThai = r["TrangThai"].ToString() ;
+                                    t.MoTa = r["MoTa"].ToString();
+                                    t.HinhAnh = r["HinhAnh"].ToString();
+                                    context.ThucAn.Add(t);
+                                    context.SaveChanges();
+                                    thanhcong++;
+                                }
+                                catch 
+                                {
+                                    thatbai++;
+                                }
+
+                            }
+
+                            context.SaveChanges();
+                            MessageBox.Show(string.Format("Kết quả nhập dữ liệu:\n- Thành công: {0}\n- Thất bại: {1}", thanhcong, thatbai),
+                                            "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            frmThucAn_Load(sender, e);
+                        }
+                        if (firstRow)
+                            MessageBox.Show("Tập tin Excel rỗng.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    }
+                }
+
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                }
+            }
+        }
+
+        private void btnXuat_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Title = "Xuất dữ liệu ra tập tin Excel";
+            saveFileDialog.Filter = "Tập tin Excel|*.xls;*.xlsx";
+            saveFileDialog.FileName = "ThucAn_" + DateTime.Now.ToShortDateString().Replace("/", "_") + ".xlsx";
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    DataTable table = new DataTable();
+                    table.Columns.AddRange(new DataColumn[8] {
+                        new DataColumn("ID", typeof(int)),
+                        new DataColumn("DanhMuc", typeof(string)),
+                        new DataColumn("DonViTinh", typeof(string)),
+                        new DataColumn("TenThucAn", typeof(string)),
+                        new DataColumn("Gia", typeof(int)),
+                        new DataColumn("TrangThai", typeof(string)),
+                        new DataColumn("MoTa", typeof(string)),
+                        new DataColumn("HinhAnh", typeof(string))});
+                    var thucAn = context.ThucAn.ToList();
+                    if (thucAn != null)
+                    {
+                        foreach (var p in thucAn)
+                        {
+                            var dm = context.DanhMuc.FirstOrDefault(r => r.Id== p.DanhMucID);
+                            var dvt = context.DonViTinh.FirstOrDefault(r => r.Id == p.DonViTinhID);
+                            table.Rows.Add(p.ID, dm.TenDanhMuc, dvt.TenDonViTinh, p.TenThucAn, p.Gia, p.TrangThai,p.MoTa, p.HinhAnh);
+                        }
+                    }
+                    using (XLWorkbook wb = new XLWorkbook())
+                    {
+                        var sheet = wb.Worksheets.Add(table, "ThucAn");
+                        sheet.Columns().AdjustToContents();
+                        wb.SaveAs(saveFileDialog.FileName);
+                        MessageBox.Show("Đã xuất dữ liệu ra tập tin Excel thành công.", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                }
+            }
+        }
+    }
 }

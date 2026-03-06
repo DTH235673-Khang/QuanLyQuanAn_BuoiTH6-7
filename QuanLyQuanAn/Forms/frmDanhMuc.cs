@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using QuanLyQuanAn.Data;
+using ClosedXML.Excel;
+using Microsoft.IdentityModel.Tokens;
 
 namespace QuanLyQuanAn.Forms
 {
@@ -106,6 +108,123 @@ namespace QuanLyQuanAn.Forms
         private void btnThoat_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        private void btnNhap_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Title = "Nhập dữ liệu từ tập tin Excel";
+            openFileDialog.Filter = "Tập tin Excel|*.xls;*.xlsx";
+            openFileDialog.Multiselect = false;
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    DataTable table = new DataTable();
+                    using (XLWorkbook workbook = new XLWorkbook(openFileDialog.FileName))
+                    {
+                        IXLWorksheet worksheet = workbook.Worksheet(1);
+                        bool firstRow = true;
+                        string readRange = "1:1";
+                        foreach (IXLRow row in worksheet.RowsUsed())
+                        {
+                            // Đọc dòng tiêu đề (dòng đầu tiên)
+                            if (firstRow)
+                            {
+                                readRange = string.Format("{0}:{1}", 1, row.LastCellUsed().Address.ColumnNumber);
+                                foreach (IXLCell cell in row.Cells(readRange))
+                                    table.Columns.Add(cell.Value.ToString());
+                                firstRow = false;
+                            }
+                            else // Đọc các dòng nội dung (các dòng tiếp theo)
+                            {
+                                table.Rows.Add();
+                                int cellIndex = 0;
+                                foreach (IXLCell cell in row.Cells(readRange))
+                                {
+                                    table.Rows[table.Rows.Count - 1][cellIndex] = cell.Value.ToString();
+                                    cellIndex++;
+                                }
+                            }
+                        }
+                        if (table.Rows.Count > 0)
+                        {
+                            int thanhCong = 0;
+                            int thatBai = 0;
+
+                            foreach (DataRow r in table.Rows)
+                            {
+                                try
+                                {
+                                    string ten= r["TenDanhMuc"].ToString();
+                                    if(ten.IsNullOrEmpty())
+                                    {
+                                        throw new Exception("");
+                                    }    
+                                    DanhMuc dm = new DanhMuc();
+                                    dm.TenDanhMuc = ten;
+
+                                    context.DanhMuc.Add(dm);
+                                    context.SaveChanges(); // Lưu ngay từng dòng để bắt lỗi chính xác dòng đó
+                                    thanhCong++;
+                                }
+                                catch
+                                {
+                                    // Nếu dòng này lỗi, rollback entry đó và tăng biến thất bại
+                                    thatBai++;
+                                    // Tùy chọn: Log lỗi hoặc bỏ qua để tiếp tục dòng sau
+                                }
+                            }
+
+                            MessageBox.Show(string.Format("Kết quả nhập dữ liệu:\n- Thành công: {0}\n- Thất bại: {1}", thanhCong, thatBai),
+                                            "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                            frmDanhMuc_Load(sender, e);
+                        }
+                        if (firstRow)
+                            MessageBox.Show("Tập tin Excel rỗng.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                }
+            }
+        }
+
+        private void btnXuat_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Title = "Xuất dữ liệu ra tập tin Excel";
+            saveFileDialog.Filter = "Tập tin Excel|*.xls;*.xlsx";
+            saveFileDialog.FileName = "DanhMuc_" + DateTime.Now.ToShortDateString().Replace("/", "_") + ".xlsx";
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    DataTable table = new DataTable();
+                    table.Columns.AddRange(new DataColumn[2] {
+                    new DataColumn("ID", typeof(int)),
+                    new DataColumn("TenDanhMuc", typeof(string))});
+                    var danhMuc = context.DanhMuc.ToList();
+                    if (danhMuc != null)
+                    {
+                        foreach (var p in danhMuc)
+                            table.Rows.Add(p.Id, p.TenDanhMuc);
+                    }
+                    using (XLWorkbook wb = new XLWorkbook())
+                    {
+                        var sheet = wb.Worksheets.Add(table, "DanhMuc");
+                        sheet.Columns().AdjustToContents();
+                        wb.SaveAs(saveFileDialog.FileName);
+                        MessageBox.Show("Đã xuất dữ liệu ra tập tin Excel thành công.", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                }
+            }
         }
     }
 }

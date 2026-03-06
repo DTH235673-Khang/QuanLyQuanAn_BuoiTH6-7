@@ -74,9 +74,9 @@ namespace QuanLyQuanAn.Migrations
                     ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     TenNguyenLieu = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DonViTinh = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    QuyCach = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     SoLuongTon = table.Column<int>(type: "int", nullable: false),
-                    GiaNhap = table.Column<int>(type: "int", nullable: false)
+                    GiaNhap = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -192,7 +192,10 @@ namespace QuanLyQuanAn.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     NgayNhap = table.Column<DateTime>(type: "datetime2", nullable: false),
                     NhanVienID = table.Column<int>(type: "int", nullable: false),
-                    NhaCungCapID = table.Column<int>(type: "int", nullable: false)
+                    NhaCungCapID = table.Column<int>(type: "int", nullable: false),
+                    TongTien = table.Column<double>(type: "float", nullable: false),
+                    TrangThai = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    GhiChu = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
