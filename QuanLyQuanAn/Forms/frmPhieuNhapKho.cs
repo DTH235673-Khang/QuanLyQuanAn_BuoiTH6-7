@@ -48,10 +48,18 @@ namespace QuanLyQuanAn.Forms
         private void btnSua_Click(object sender, EventArgs e)
         {
             id = Convert.ToInt32(dataGridView.CurrentRow.Cells["ID"].Value.ToString());
-            using (frmPhieuNhapKho_ChiTiet chiTiet = new frmPhieuNhapKho_ChiTiet(id))
+            var p = context.PhieuNhapKho.Find(id);
+            if(p.TrangThai=="Chưa duyệt")
             {
-                chiTiet.ShowDialog();
-                frmPhieuNhapKho_Load(sender, e);
+                using (frmPhieuNhapKho_ChiTiet chiTiet = new frmPhieuNhapKho_ChiTiet(id))
+                {
+                    chiTiet.ShowDialog();
+                    frmPhieuNhapKho_Load(sender, e);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Phiếu nhập kho đã duyệt không thể chỉnh sửa", "Thông báo");
             }
         }
 
@@ -68,11 +76,15 @@ namespace QuanLyQuanAn.Forms
                 {
                     id = Convert.ToInt32(dataGridView.CurrentRow.Cells["ID"].Value.ToString());
                     PhieuNhapKho t = context.PhieuNhapKho.Find(id);
-                    if (t != null)
+                    if (t != null && t.TrangThai=="Chưa duyệt")
                     {
                         context.PhieuNhapKho.Remove(t);
                     }
-                    context.SaveChanges();
+                    else if(t.TrangThai=="Đã duyệt")
+                    {
+                        MessageBox.Show("Phiếu nhập kho đã duyệt không thể xóa", "Thông báo");
+                    }    
+                        context.SaveChanges();
                     frmPhieuNhapKho_Load(sender, e);
                 }
             }
@@ -247,7 +259,7 @@ namespace QuanLyQuanAn.Forms
                         {
                             var nv = context.NhanVien.FirstOrDefault(r => r.ID == p.NhanVienID);
                             var ncc = context.NhaCungCap.FirstOrDefault(r => r.ID == p.NhaCungCapID);
-                            tableHD.Rows.Add(p.ID, nv.HoVaTen, ncc.TenNhaCungCap, p.NgayNhap, p.GhiChu,p.TrangThai, p.TongTien);
+                            tableHD.Rows.Add(p.ID, nv.HoVaTen, ncc.TenNhaCungCap, p.NgayNhap, p.GhiChu, p.TrangThai, p.TongTien);
                         }
                     }
 
@@ -290,6 +302,48 @@ namespace QuanLyQuanAn.Forms
                     MessageBox.Show(ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 }
             }
+        }
+
+        private void btnDuyetPhieu_Click(object sender, EventArgs e)
+        {
+            id = Convert.ToInt32(dataGridView.CurrentRow.Cells["ID"].Value.ToString());
+            if (id.ToString().IsNullOrEmpty())
+            {
+                MessageBox.Show("Vui lòng chọn phiếu nhập kho càn duyệt!", "Thông báo", MessageBoxButtons.OK);
+            }
+            else
+            {
+                if (MessageBox.Show("Xác nhận duyệt phiếu nhập kho " + id + "? \n Lưu ý: Phiếu nhập kho đã duyệt sẽ không thể xóa hay chỉnh sửa.", "Xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                {
+                    id = Convert.ToInt32(dataGridView.CurrentRow.Cells["ID"].Value.ToString());
+                    PhieuNhapKho t = context.PhieuNhapKho.Find(id);
+                    var chitiet = context.PhieuNhapKho_ChiTiet.Where(r => r.PhieuNhapKhoID == id).ToList();
+                    if (t != null && t.TrangThai=="Chưa duyệt")
+                    {
+                        t.TrangThai = "Đã duyệt";
+                        t.NgayNhap = DateTime.Now;
+                        foreach (var ch in chitiet)
+                        {
+                            var nguyenlieu = context.NguyenLieu.Find(ch.NguyenLieuID);
+                            if (nguyenlieu != null)
+                            {
+                                nguyenlieu.SoLuongTon += ch.SoLuongNhap;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Phiếu nhập kho đã được duyệt","Thông báo");
+                    }    
+                        context.SaveChanges();
+                    frmPhieuNhapKho_Load(sender, e);
+                }
+            }
+        }
+
+        private void btnThoat_Click(object sender, EventArgs e)
+        {
+            this.Close();   
         }
     }
 }

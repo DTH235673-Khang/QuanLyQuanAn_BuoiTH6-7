@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml.VariantTypes;
 using Microsoft.IdentityModel.Tokens;
 using QuanLyQuanAn.Data;
 using BC = BCrypt.Net.BCrypt;
@@ -23,6 +24,12 @@ namespace QuanLyQuanAn.Forms
         {
             InitializeComponent();
         }
+        public void LayChucVuVaoComboBox()
+        {
+            cboChucVu.DataSource = context.ChucVu.ToList();
+            cboChucVu.ValueMember = "ID";
+            cboChucVu.DisplayMember = "TenChucVu";
+        }
         private void BatTatChucNang(bool giaTri)
         {
             btnLuu.Enabled = giaTri;
@@ -32,7 +39,7 @@ namespace QuanLyQuanAn.Forms
             txtDiaChi.Enabled = giaTri;
             txtTenDangNhap.Enabled = giaTri;
             txtMatKhau.Enabled = giaTri;
-            cboQuyenHan.Enabled = giaTri;
+            cboChucVu.Enabled = giaTri;
             btnThem.Enabled = !giaTri;
             btnSua.Enabled = !giaTri;
             btnXoa.Enabled = !giaTri;
@@ -42,12 +49,24 @@ namespace QuanLyQuanAn.Forms
         }
         private void frmNhanVien_Load(object sender, EventArgs e)
         {
+            LayChucVuVaoComboBox();
             BatTatChucNang(false);
             dataGridView.AutoGenerateColumns = false;
-            List<NhanVien> nv = new List<NhanVien>();
-            nv = context.NhanVien.ToList();
+            var listNhanVien = context.NhanVien.Select(nv => new
+            {
+                nv.ID,
+                nv.HoVaTen,
+                nv.DienThoai,
+                nv.DiaChi,
+                nv.TenDangNhap,
+                nv.MatKhau,
+                nv.ChucVuID,
+                nv.QuyenHan,
+                ChucVu = nv.ChucVu.TenChucVu 
+            }).ToList();
+            
             BindingSource bindingSource = new BindingSource();
-            bindingSource.DataSource = nv;
+            bindingSource.DataSource = listNhanVien;
             txtHoVaTen.DataBindings.Clear();
             txtHoVaTen.DataBindings.Add("Text", bindingSource, "HoVaTen", false, DataSourceUpdateMode.Never);
             txtDiaChi.DataBindings.Clear();
@@ -56,8 +75,8 @@ namespace QuanLyQuanAn.Forms
             txtDienThoai.DataBindings.Add("Text", bindingSource, "DienThoai", false, DataSourceUpdateMode.Never);
             txtTenDangNhap.DataBindings.Clear();
             txtTenDangNhap.DataBindings.Add("Text", bindingSource, "TenDangNhap", false, DataSourceUpdateMode.Never);
-            cboQuyenHan.DataBindings.Clear();
-            cboQuyenHan.DataBindings.Add("SelectedIndex", bindingSource, "QuyenHan", false, DataSourceUpdateMode.Never);
+            cboChucVu.DataBindings.Clear();
+            cboChucVu.DataBindings.Add("SelectedValue", bindingSource, "ChucVuID", true, DataSourceUpdateMode.Never);
             dataGridView.DataSource = bindingSource;
         }
 
@@ -70,7 +89,7 @@ namespace QuanLyQuanAn.Forms
             txtDiaChi.Clear();
             txtTenDangNhap.Clear();
             txtMatKhau.Clear();
-            cboQuyenHan.Text = "";
+            cboChucVu.Text = "";
         }
 
         private void btnSua_Click(object sender, EventArgs e)
@@ -102,8 +121,8 @@ namespace QuanLyQuanAn.Forms
                 MessageBox.Show("Vui lòng nhập họ và tên nhân viên?", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             else if (string.IsNullOrWhiteSpace(txtTenDangNhap.Text))
                 MessageBox.Show("Vui lòng nhập tên đăng nhập?", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            else if (string.IsNullOrWhiteSpace(cboQuyenHan.Text))
-                MessageBox.Show("Vui lòng chọn quyền hạn cho nhân viên?", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            else if (string.IsNullOrWhiteSpace(cboChucVu.Text))
+                MessageBox.Show("Vui lòng chọn chức vụ cho nhân viên?", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             else
             {
                 if (xuLyThem)
@@ -118,7 +137,9 @@ namespace QuanLyQuanAn.Forms
                         nv.DiaChi = txtDiaChi.Text;
                         nv.TenDangNhap = txtTenDangNhap.Text;
                         nv.MatKhau = BC.HashPassword(txtMatKhau.Text); // Mã hóa mật khẩu
-                        nv.QuyenHan = cboQuyenHan.SelectedIndex == 0 ? true : false;
+                        var cv = context.ChucVu.FirstOrDefault(r => r.TenChucVu == cboChucVu.Text);
+                        nv.ChucVuID = cv.ID;
+                        nv.QuyenHan = (cv.TenChucVu == "Quản lý") ? true : false;
                         context.NhanVien.Add(nv);
                         context.SaveChanges();
                     }
@@ -132,12 +153,14 @@ namespace QuanLyQuanAn.Forms
                         nv.DienThoai = txtDienThoai.Text;
                         nv.DiaChi = txtDiaChi.Text;
                         nv.TenDangNhap = txtTenDangNhap.Text;
-                        nv.QuyenHan = cboQuyenHan.SelectedIndex == 0 ? true : false;
                         context.NhanVien.Update(nv);
                         if (string.IsNullOrEmpty(txtMatKhau.Text))
                             context.Entry(nv).Property(x => x.MatKhau).IsModified = false; // Giữ nguyên mật khẩu cũ
                         else
                             nv.MatKhau = BC.HashPassword(txtMatKhau.Text); // Cập nhật mật khẩu mới
+                        var cv = context.ChucVu.FirstOrDefault(r => r.TenChucVu == cboChucVu.Text);
+                        nv.ChucVuID = cv.ID;
+                        nv.QuyenHan = (cv.TenChucVu == "Quản lý") ? true : false;
                         context.SaveChanges();
                     }
                 }
@@ -220,11 +243,16 @@ namespace QuanLyQuanAn.Forms
                                     string tdn = r["TenDangNhap"].ToString();
                                     string mk = r["MatKhau"].ToString();
                                     string qh = r["QuyenHan"].ToString().Trim().ToLower();
-                                    if (ten.IsNullOrEmpty() || diachi.IsNullOrEmpty() || dienthoai.IsNullOrEmpty())
+                                    string cv = r["ChucVu"].ToString();
+                                    if (ten.IsNullOrEmpty() || diachi.IsNullOrEmpty() || dienthoai.IsNullOrEmpty() || cv.IsNullOrEmpty())
                                     {
                                         throw new Exception("");
                                     }
-                                    else if(tdn.IsNullOrEmpty()||mk.IsNullOrEmpty()||qh.IsNullOrEmpty())
+                                    else if (tdn.IsNullOrEmpty() || mk.IsNullOrEmpty() || qh.IsNullOrEmpty())
+                                    {
+                                        throw new Exception("");
+                                    }
+                                    else if ((cv == "Quản lý" && qh == "false") || (cv != "Quản lý" && qh == "true"))
                                     {
                                         throw new Exception("");
                                     }
@@ -235,12 +263,13 @@ namespace QuanLyQuanAn.Forms
                                     nv.TenDangNhap = tdn;
                                     nv.MatKhau = mk;
                                     nv.QuyenHan = (qh == "true") ? true : false;
-
+                                    var chucvu = context.ChucVu.FirstOrDefault(r => r.TenChucVu == cv);
+                                    nv.ChucVuID = chucvu.ID;
                                     context.NhanVien.Add(nv);
                                     context.SaveChanges(); // Lưu ngay từng dòng để bắt lỗi chính xác dòng đó
                                     thanhCong++;
                                 }
-                                catch 
+                                catch
                                 {
                                     // Nếu dòng này lỗi, rollback entry đó và tăng biến thất bại
                                     thatBai++;
@@ -276,19 +305,23 @@ namespace QuanLyQuanAn.Forms
                 try
                 {
                     DataTable table = new DataTable();
-                    table.Columns.AddRange(new DataColumn[7] {
+                    table.Columns.AddRange(new DataColumn[] {
                     new DataColumn("ID", typeof(int)),
                     new DataColumn("HoVaTen", typeof(string)),
                     new DataColumn("DienThoai", typeof(string)),
                     new DataColumn("DiaChi", typeof(string)),
                     new DataColumn("TenDangNhap", typeof(string)),
                     new DataColumn("MatKhau", typeof(string)),
+                    new DataColumn("ChucVu", typeof(string)),
                     new DataColumn("QuyenHan", typeof(bool))});
                     var nhanVien = context.NhanVien.ToList();
                     if (nhanVien != null)
                     {
                         foreach (var p in nhanVien)
-                            table.Rows.Add(p.ID, p.HoVaTen, p.DienThoai, p.DiaChi,p.TenDangNhap,p.MatKhau,p.QuyenHan);
+                        {
+                            var c = context.ChucVu.FirstOrDefault(r => r.ID == p.ChucVuID);
+                            table.Rows.Add(p.ID, p.HoVaTen, p.DienThoai, p.DiaChi, p.TenDangNhap, p.MatKhau, c.TenChucVu, p.QuyenHan);
+                        }
                     }
                     using (XLWorkbook wb = new XLWorkbook())
                     {
@@ -304,5 +337,7 @@ namespace QuanLyQuanAn.Forms
                 }
             }
         }
+
+      
     }
 }

@@ -115,6 +115,7 @@
             Name = "frmChiTietBan";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Chi Tiết Bàn";
+            Load += frmChiTietBan_Load;
             ResumeLayout(false);
             PerformLayout();
         }

@@ -13,7 +13,7 @@ namespace QuanLyQuanAn.Forms
 {
     public partial class frmChiTietBan : Form
     {
-        QLQADbContext context = new QLQADbContext(); // Khởi tạo biến ngữ cảnh CSDL
+       QLQADbContext context = new QLQADbContext(); // Khởi tạo biến ngữ cảnh CSDL
         string tablename; // Lấy mã hóa đơn (dùng cho Sửa và Xóa)
         public frmChiTietBan(string ban)
         {
@@ -74,11 +74,11 @@ namespace QuanLyQuanAn.Forms
 
         private void btnChuyenBan_Click(object sender, EventArgs e)
         {
-            if (txtBanMoi.Text=="")
+            if (txtBanMoi.Text == "")
             {
                 MessageBox.Show("Vui lòng nhập bàn sẽ chuyển tới!", "Thông báo");
                 return;
-            }    
+            }
             Ban b_canchuyen = context.Ban.FirstOrDefault(r => r.TenBan.Contains(tablename));
             Ban b_goc = context.Ban.FirstOrDefault(r => r.TenBan.Contains(txtBanMoi.Text));
             HoaDon hd_canchuyen = context.HoaDon.FirstOrDefault(r => r.BanID.Equals(b_canchuyen.ID) && r.trangthai == 0);
@@ -96,18 +96,18 @@ namespace QuanLyQuanAn.Forms
             }
             else if (b_goc.TrangThai == "1")
             {
-                DialogResult r = MessageBox.Show("Bàn "+txtBanMoi.Text+" đang có khách:" +
+                DialogResult r = MessageBox.Show("Bàn " + txtBanMoi.Text + " đang có khách:" +
                     "\n +Bấm Yes nếu bạn muốn gộp 2 bàn lại " +
                     "\n +Bấm No nếu bạn chỉ muốn switch 2 bàn " +
-                    "\n +Bấm Cancel nếu bạn muốn dừng thao tác", "Thông báo",MessageBoxButtons.YesNoCancel);
+                    "\n +Bấm Cancel nếu bạn muốn dừng thao tác", "Thông báo", MessageBoxButtons.YesNoCancel);
                 if (r == DialogResult.Yes)
                 {
                     HoaDon hd_goc = context.HoaDon.FirstOrDefault(r => r.BanID.Equals(b_goc.ID) && r.trangthai == 0);
-                    var cthd = context.HoaDon_ChiTiet.Where(r=>r.HoaDonID==hd_canchuyen.ID);
+                    var cthd = context.HoaDon_ChiTiet.Where(r => r.HoaDonID == hd_canchuyen.ID);
                     foreach (var item in cthd)
                     {
-                        var montrung=context.HoaDon_ChiTiet.FirstOrDefault(ct=>ct.HoaDonID.Equals(hd_goc.ID)&& ct.ThucAnID==item.ThucAnID);
-                        if(montrung!=null)
+                        var montrung = context.HoaDon_ChiTiet.FirstOrDefault(ct => ct.HoaDonID.Equals(hd_goc.ID) && ct.ThucAnID == item.ThucAnID);
+                        if (montrung != null)
                         {
                             montrung.SoLuongBan += item.SoLuongBan;
                             context.HoaDon_ChiTiet.Remove(item);
@@ -123,7 +123,7 @@ namespace QuanLyQuanAn.Forms
                     hd_goc.TongTien = context.HoaDon_ChiTiet.Where(ct => ct.HoaDonID == hd_goc.ID).Sum(ct => ct.DonGiaBan * ct.SoLuongBan);
                     context.SaveChanges();
                 }
-                else if(r==DialogResult.No)
+                else if (r == DialogResult.No)
                 {
                     HoaDon hd_goc = context.HoaDon.FirstOrDefault(r => r.BanID.Equals(b_goc.ID) && r.trangthai == 0);
                     hd_canchuyen.BanID = b_goc.ID;
@@ -135,6 +135,10 @@ namespace QuanLyQuanAn.Forms
 
         }
 
+        private void frmChiTietBan_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }
 

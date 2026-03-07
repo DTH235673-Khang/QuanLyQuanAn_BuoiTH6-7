@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,14 +9,19 @@ using System.Configuration;
 
 namespace QuanLyQuanAn.Data
 {
-    public class QLQADbContext: DbContext
+    public class QLQADbContext : DbContext
     {
         public DbSet<Ban> Ban { get; set; }
+        public DbSet<BangCong> BangCong { get; set; }
+        public DbSet<BangLuong> BangLuong { get; set; }
+        public DbSet<CaLam> CaLam { get; set; }
+        public DbSet<ChucVu> ChucVu { get; set; }
         public DbSet<DanhMuc> DanhMuc { get; set; }
         public DbSet<DonViTinh> DonViTinh { get; set; }
         public DbSet<ThucAn> ThucAn { get; set; }
         public DbSet<NhanVien> NhanVien { get; set; }
         public DbSet<KhachHang> KhachHang { get; set; }
+        public DbSet<LichLam> LichLam { get; set; }
         public DbSet<HoaDon> HoaDon { get; set; }
         public DbSet<HoaDon_ChiTiet> HoaDon_ChiTiet { get; set; }
         public DbSet<NhaCungCap> NhaCungCap { get; set; }

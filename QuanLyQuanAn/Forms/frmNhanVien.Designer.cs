@@ -29,11 +29,11 @@
         private void InitializeComponent()
         {
             groupBox1 = new GroupBox();
-            cboQuyenHan = new ComboBox();
+            cboChucVu = new ComboBox();
+            label7 = new Label();
             btnXuat = new Button();
             btnNhap = new Button();
             btnTimKiem = new Button();
-            label6 = new Label();
             txtMatKhau = new TextBox();
             label5 = new Label();
             txtTenDangNhap = new TextBox();
@@ -57,7 +57,7 @@
             DiaChi = new DataGridViewTextBoxColumn();
             DienThoai = new DataGridViewTextBoxColumn();
             TenDangNhap = new DataGridViewTextBoxColumn();
-            QuyenHan = new DataGridViewTextBoxColumn();
+            ChucVu = new DataGridViewTextBoxColumn();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridView).BeginInit();
@@ -65,11 +65,11 @@
             // 
             // groupBox1
             // 
-            groupBox1.Controls.Add(cboQuyenHan);
+            groupBox1.Controls.Add(cboChucVu);
+            groupBox1.Controls.Add(label7);
             groupBox1.Controls.Add(btnXuat);
             groupBox1.Controls.Add(btnNhap);
             groupBox1.Controls.Add(btnTimKiem);
-            groupBox1.Controls.Add(label6);
             groupBox1.Controls.Add(txtMatKhau);
             groupBox1.Controls.Add(label5);
             groupBox1.Controls.Add(txtTenDangNhap);
@@ -88,19 +88,28 @@
             groupBox1.Controls.Add(label1);
             groupBox1.Location = new Point(20, 12);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(1011, 127);
+            groupBox1.Size = new Size(1016, 163);
             groupBox1.TabIndex = 2;
             groupBox1.TabStop = false;
             groupBox1.Text = "Thông tin nhân viên";
             // 
-            // cboQuyenHan
+            // cboChucVu
             // 
-            cboQuyenHan.FormattingEnabled = true;
-            cboQuyenHan.Items.AddRange(new object[] { "Quản lý", "Nhân viên" });
-            cboQuyenHan.Location = new Point(498, 92);
-            cboQuyenHan.Name = "cboQuyenHan";
-            cboQuyenHan.Size = new Size(197, 28);
-            cboQuyenHan.TabIndex = 21;
+            cboChucVu.FormattingEnabled = true;
+            cboChucVu.Items.AddRange(new object[] { "Quản lý", "Nhân viên" });
+            cboChucVu.Location = new Point(477, 93);
+            cboChucVu.Name = "cboChucVu";
+            cboChucVu.Size = new Size(222, 28);
+            cboChucVu.TabIndex = 23;
+            // 
+            // label7
+            // 
+            label7.AutoSize = true;
+            label7.Location = new Point(396, 96);
+            label7.Name = "label7";
+            label7.Size = new Size(64, 20);
+            label7.TabIndex = 22;
+            label7.Text = "Chức vụ:";
             // 
             // btnXuat
             // 
@@ -131,15 +140,6 @@
             btnTimKiem.Text = "Tìm kiếm";
             btnTimKiem.UseVisualStyleBackColor = true;
             btnTimKiem.Click += btnTimKiem_Click;
-            // 
-            // label6
-            // 
-            label6.AutoSize = true;
-            label6.Location = new Point(396, 96);
-            label6.Name = "label6";
-            label6.Size = new Size(86, 20);
-            label6.TabIndex = 16;
-            label6.Text = "Quyền hạn: ";
             // 
             // txtMatKhau
             // 
@@ -287,12 +287,12 @@
             // groupBox2
             // 
             groupBox2.Controls.Add(dataGridView);
-            groupBox2.Location = new Point(20, 145);
+            groupBox2.Location = new Point(12, 181);
             groupBox2.Name = "groupBox2";
-            groupBox2.Size = new Size(1011, 372);
+            groupBox2.Size = new Size(1024, 372);
             groupBox2.TabIndex = 3;
             groupBox2.TabStop = false;
-            groupBox2.Text = "Danh sách danh mục món ăn";
+            groupBox2.Text = "Danh sách nhân viên";
             // 
             // dataGridView
             // 
@@ -300,19 +300,17 @@
             dataGridView.AllowUserToDeleteRows = false;
             dataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dataGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView.Columns.AddRange(new DataGridViewColumn[] { ID, HoVaTen, DiaChi, DienThoai, TenDangNhap, QuyenHan });
+            dataGridView.Columns.AddRange(new DataGridViewColumn[] { ID, HoVaTen, DiaChi, DienThoai, TenDangNhap, ChucVu });
             dataGridView.Dock = DockStyle.Fill;
             dataGridView.Location = new Point(3, 23);
-            dataGridView.MultiSelect = false;
             dataGridView.Name = "dataGridView";
             dataGridView.RowHeadersWidth = 51;
-            dataGridView.Size = new Size(1005, 346);
+            dataGridView.Size = new Size(1018, 346);
             dataGridView.TabIndex = 0;
             // 
             // ID
             // 
             ID.DataPropertyName = "ID";
-            ID.FillWeight = 96.25668F;
             ID.HeaderText = "ID";
             ID.MinimumWidth = 6;
             ID.Name = "ID";
@@ -320,15 +318,13 @@
             // HoVaTen
             // 
             HoVaTen.DataPropertyName = "HoVaTen";
-            HoVaTen.FillWeight = 100.748657F;
-            HoVaTen.HeaderText = "Họ và Tên";
+            HoVaTen.HeaderText = "Họ và tên";
             HoVaTen.MinimumWidth = 6;
             HoVaTen.Name = "HoVaTen";
             // 
             // DiaChi
             // 
             DiaChi.DataPropertyName = "DiaChi";
-            DiaChi.FillWeight = 100.748657F;
             DiaChi.HeaderText = "Địa chỉ";
             DiaChi.MinimumWidth = 6;
             DiaChi.Name = "DiaChi";
@@ -336,7 +332,6 @@
             // DienThoai
             // 
             DienThoai.DataPropertyName = "DienThoai";
-            DienThoai.FillWeight = 100.748657F;
             DienThoai.HeaderText = "Điện thoại";
             DienThoai.MinimumWidth = 6;
             DienThoai.Name = "DienThoai";
@@ -344,24 +339,22 @@
             // TenDangNhap
             // 
             TenDangNhap.DataPropertyName = "TenDangNhap";
-            TenDangNhap.FillWeight = 100.748657F;
             TenDangNhap.HeaderText = "Tên đăng nhập";
             TenDangNhap.MinimumWidth = 6;
             TenDangNhap.Name = "TenDangNhap";
             // 
-            // QuyenHan
+            // ChucVu
             // 
-            QuyenHan.DataPropertyName = "QuyenHan";
-            QuyenHan.FillWeight = 100.748657F;
-            QuyenHan.HeaderText = "Quyền hạn";
-            QuyenHan.MinimumWidth = 6;
-            QuyenHan.Name = "QuyenHan";
+            ChucVu.DataPropertyName = "ChucVu";
+            ChucVu.HeaderText = "Chức vụ";
+            ChucVu.MinimumWidth = 6;
+            ChucVu.Name = "ChucVu";
             // 
             // frmNhanVien
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1043, 527);
+            ClientSize = new Size(1045, 566);
             Controls.Add(groupBox1);
             Controls.Add(groupBox2);
             Name = "frmNhanVien";
@@ -386,8 +379,6 @@
         private TextBox txtHoVaTen;
         private Label label1;
         private GroupBox groupBox2;
-        private DataGridView dataGridView;
-        private Label label6;
         private TextBox txtMatKhau;
         private Label label5;
         private TextBox txtTenDangNhap;
@@ -399,12 +390,14 @@
         private Button btnXuat;
         private Button btnNhap;
         private Button btnTimKiem;
+        private ComboBox cboChucVu;
+        private Label label7;
+        private DataGridView dataGridView;
         private DataGridViewTextBoxColumn ID;
         private DataGridViewTextBoxColumn HoVaTen;
         private DataGridViewTextBoxColumn DiaChi;
         private DataGridViewTextBoxColumn DienThoai;
         private DataGridViewTextBoxColumn TenDangNhap;
-        private DataGridViewTextBoxColumn QuyenHan;
-        private ComboBox cboQuyenHan;
+        private DataGridViewTextBoxColumn ChucVu;
     }
 }
