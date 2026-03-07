@@ -109,6 +109,14 @@ namespace QuanLyQuanAn.Forms
                 MessageBox.Show("Giá nhập phải lớn hơn 0.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             else
             {
+                bool daTonTai = context.NguyenLieu.Any(x => x.TenNguyenLieu == txtTenNguyenLieu.Text
+                    && x.QuyCach == cboQuyCach.Text
+                    && x.GiaNhap==numGiaNhap.Value);
+                if (daTonTai)
+                {
+                    MessageBox.Show("Nguyên liệu đã tồn tại", "Lỗi");
+                    return;
+                }
                 if (xuLyThem)
                 {
                     NguyenLieu t = new NguyenLieu();
@@ -200,6 +208,13 @@ namespace QuanLyQuanAn.Forms
                                     if (ten.IsNullOrEmpty() || g <= 0 || s <= 0)
                                     {
                                         throw new Exception("");
+                                    }
+                                    bool daTonTai = context.NguyenLieu.Any(x => x.TenNguyenLieu == ten
+                                          && x.QuyCach == quycach
+                                          && x.GiaNhap == g);
+                                    if (daTonTai)
+                                    {
+                                       throw new Exception();
                                     }
                                     NguyenLieu t = new NguyenLieu();
                                     t.TenNguyenLieu = ten;

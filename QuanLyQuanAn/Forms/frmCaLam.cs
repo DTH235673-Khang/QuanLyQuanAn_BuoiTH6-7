@@ -8,17 +8,18 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.IdentityModel.Tokens;
 using QuanLyQuanAn.Data;
 
 namespace QuanLyQuanAn.Forms
 {
-    public partial class frmNhaCungCap : Form
+    public partial class frmCaLam : Form
     {
         QLQADbContext context = new QLQADbContext(); // Khởi tạo biến ngữ cảnh CSDL
         bool xuLyThem = false; // Kiểm tra có nhấn vào nút Thêm hay không?
         int id;
-        public frmNhaCungCap()
+        public frmCaLam()
         {
             InitializeComponent();
         }
@@ -26,40 +27,42 @@ namespace QuanLyQuanAn.Forms
         {
             btnLuu.Enabled = giaTri;
             btnHuyBo.Enabled = giaTri;
-            txtHoVaTen.Enabled = giaTri;
-            txtDienThoai.Enabled = giaTri;
-            txtDiaChi.Enabled = giaTri;
+            txtTenCaLam.Enabled = giaTri;
+            txtGioBatDau.Enabled = giaTri;
+            txtGioKetThuc.Enabled = giaTri;
+            txtHeSoLuong.Enabled = giaTri;
             btnThem.Enabled = !giaTri;
             btnSua.Enabled = !giaTri;
             btnXoa.Enabled = !giaTri;
-            btnTimKiem.Enabled = !giaTri;
-            btnNhap.Enabled = !giaTri;
-            btnXuat.Enabled = !giaTri;
         }
-        private void frmNhaCungCap_Load(object sender, EventArgs e)
+
+        private void frmCaLam_Load(object sender, EventArgs e)
         {
             BatTatChucNang(false);
-            List<NhaCungCap> ncc = new List<NhaCungCap>();
-            ncc = context.NhaCungCap.ToList();
+            dataGridView.AutoGenerateColumns = false;
+            List<CaLam> ca = new List<CaLam>();
+            ca = context.CaLam.ToList();
             BindingSource bindingSource = new BindingSource();
-            bindingSource.DataSource = ncc;
-            txtHoVaTen.DataBindings.Clear();
-            txtHoVaTen.DataBindings.Add("Text", bindingSource, "TenNhaCungCap", false, DataSourceUpdateMode.Never);
-            txtDiaChi.DataBindings.Clear();
-            txtDiaChi.DataBindings.Add("Text", bindingSource, "DiaChi", false, DataSourceUpdateMode.Never);
-            txtDienThoai.DataBindings.Clear();
-            txtDienThoai.DataBindings.Add("Text", bindingSource, "SoDienThoai", false, DataSourceUpdateMode.Never);
+            bindingSource.DataSource = ca;
+            txtTenCaLam.DataBindings.Clear();
+            txtTenCaLam.DataBindings.Add("Text", bindingSource, "TenCa", false, DataSourceUpdateMode.Never);
+            txtGioBatDau.DataBindings.Clear();
+            txtGioBatDau.DataBindings.Add("Text", bindingSource, "GioBatdau", false, DataSourceUpdateMode.Never);
+            txtGioKetThuc.DataBindings.Clear();
+            txtGioKetThuc.DataBindings.Add("Text", bindingSource, "GioKetThuc", false, DataSourceUpdateMode.Never);
+            txtHeSoLuong.DataBindings.Clear();
+            txtHeSoLuong.DataBindings.Add("Text", bindingSource, "HeSoLuong", false, DataSourceUpdateMode.Never);
             dataGridView.DataSource = bindingSource;
-
         }
 
         private void btnThem_Click(object sender, EventArgs e)
         {
             xuLyThem = true;
             BatTatChucNang(true);
-            txtHoVaTen.Clear();
-            txtDienThoai.Clear();
-            txtDiaChi.Clear();
+            txtTenCaLam.Clear();
+            txtGioBatDau.Clear();
+            txtGioKetThuc.Clear();
+            txtHeSoLuong.Clear();
         }
 
         private void btnSua_Click(object sender, EventArgs e)
@@ -71,77 +74,104 @@ namespace QuanLyQuanAn.Forms
 
         private void btnXoa_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("Xác nhận xóa nhà cung cấp " + txtHoVaTen.Text + "?", "Xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (MessageBox.Show("Xác nhận xóa ca làm?", "Xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 id = Convert.ToInt32(dataGridView.CurrentRow.Cells["ID"].Value.ToString());
-                NhaCungCap ncc = context.NhaCungCap.Find(id);
-                if (ncc != null)
+                CaLam ca = context.CaLam.Find(id);
+                if (ca != null)
                 {
-                    context.NhaCungCap.Remove(ncc);
+                    context.CaLam.Remove(ca);
                 }
                 context.SaveChanges();
-                frmNhaCungCap_Load(sender, e);
+                frmCaLam_Load(sender, e);
             }
+
         }
 
         private void btnLuu_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtHoVaTen.Text))
-                MessageBox.Show("Vui lòng nhập họ và tên nhà cung cấp?", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            if (string.IsNullOrWhiteSpace(txtTenCaLam.Text))
+                MessageBox.Show("Vui lòng nhập tên ca làm", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            else if (txtGioBatDau.Text.IsNullOrEmpty())
+                MessageBox.Show("Vui lòng nhập giờ bắt đầu", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            else if (txtGioKetThuc.Text.IsNullOrEmpty())
+                MessageBox.Show("Vui lòng nhập giờ bắt đầu", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            else if (txtHeSoLuong.Text.IsNullOrEmpty())
+                MessageBox.Show("Vui lòng nhập hệ số lương", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            else if (!CheckDinhDangTime(txtGioBatDau.Text, "Giờ bắt đầu"))
+                return;
+            else if (!CheckDinhDangTime(txtGioKetThuc.Text, "Giờ kết thúc"))
+                return;
+            else if (string.IsNullOrWhiteSpace(txtHeSoLuong.Text) || !float.TryParse(txtHeSoLuong.Text, out float hsl) || hsl <= 0)
+                MessageBox.Show("Hệ số lương phải là số và lớn hơn 0", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             else
             {
-                bool daTonTai = context.NhaCungCap.Any(x => x.TenNhaCungCap == txtHoVaTen.Text
-                    && x.SoDienThoai == txtDienThoai.Text
-                    && x.DiaChi == txtDiaChi.Text);
+                TimeOnly batDau = TimeOnly.Parse(txtGioBatDau.Text);
+                TimeOnly ketThuc = TimeOnly.Parse(txtGioKetThuc.Text);
+
+                if (ketThuc <= batDau)
+                {
+                    MessageBox.Show("Giờ kết thúc phải sau giờ bắt đầu!", "Lỗi logic", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return; 
+                }
+                bool daTonTai = context.CaLam.Any(x => x.TenCa == txtTenCaLam.Text
+                    && x.GioBatDau == batDau
+                     && x.GioKetThuc==ketThuc
+                     && x.HeSoLuong==Convert.ToSingle(txtHeSoLuong.Text));
                 if (daTonTai)
                 {
-                    MessageBox.Show("Nhà cung cấp đã tồn tại", "Lỗi");
+                    MessageBox.Show("Ca làm đã tồn tại", "Lỗi");
                     return;
                 }
+
+
                 if (xuLyThem)
                 {
-                    NhaCungCap ncc = new NhaCungCap();
-                    ncc.TenNhaCungCap = txtHoVaTen.Text;
-                    ncc.SoDienThoai = txtDienThoai.Text;
-                    ncc.DiaChi = txtDiaChi.Text;
-                    context.NhaCungCap.Add(ncc);
+                    CaLam ca = new CaLam();
+                    ca.TenCa = txtTenCaLam.Text;
+                    ca.GioBatDau = TimeOnly.Parse(txtGioBatDau.Text);
+                    ca.GioKetThuc = TimeOnly.Parse(txtGioKetThuc.Text);
+                    ca.HeSoLuong = Convert.ToSingle(txtHeSoLuong.Text);
+                    context.CaLam.Add(ca);
                     context.SaveChanges();
                 }
                 else
                 {
-                    NhaCungCap ncc = context.NhaCungCap.Find(id);
-                    if (ncc != null)
+                    CaLam ca = context.CaLam.Find(id);
+                    if (ca != null)
                     {
-                        ncc.TenNhaCungCap = txtHoVaTen.Text;
-                        ncc.SoDienThoai = txtDienThoai.Text;
-                        ncc.DiaChi = txtDiaChi.Text;
-                        context.NhaCungCap.Update(ncc);
+                        ca.TenCa = txtTenCaLam.Text;
+                        ca.GioBatDau = TimeOnly.Parse(txtGioBatDau.Text);
+                        ca.GioKetThuc = TimeOnly.Parse(txtGioKetThuc.Text);
+                        ca.HeSoLuong = Convert.ToSingle(txtHeSoLuong.Text);
+                        context.CaLam.Update(ca);
                         context.SaveChanges();
                     }
                 }
-                frmNhaCungCap_Load(sender, e);
+                frmCaLam_Load(sender, e);
             }
         }
-
+        private bool CheckDinhDangTime(string input, string fieldName)
+        {
+            if (TimeOnly.TryParse(input,out _))
+            {
+                return true;
+            }
+            else
+            {
+                MessageBox.Show($"{fieldName} không đúng định dạng thời gian (Ví dụ hợp lệ: 08:30, 14:00:00)",
+                                "Lỗi định dạng", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+        }
         private void btnHuyBo_Click(object sender, EventArgs e)
         {
-            frmNhaCungCap_Load(sender, e);
+            frmCaLam_Load(sender, e);
         }
 
         private void btnThoat_Click(object sender, EventArgs e)
         {
             this.Close();
-        }
-
-        private void btnTimKiem_Click(object sender, EventArgs e)
-        {
-            if (string.IsNullOrWhiteSpace(txtHoVaTen.Text))
-                MessageBox.Show("Vui lòng nhập họ và tên nhà cung cấp?", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            else
-            {
-                dataGridView.DataSource = context.NhaCungCap.Where(ncc => ncc.TenNhaCungCap.Contains(txtHoVaTen.Text)).ToList();
-                BatTatChucNang(true);
-            }
         }
 
         private void btnNhap_Click(object sender, EventArgs e)
@@ -190,26 +220,30 @@ namespace QuanLyQuanAn.Forms
                             {
                                 try
                                 {
-                                    string ten = r["TenNhaCungCap"].ToString();
-                                    string diachi = r["DiaChi"].ToString();
-                                    string dienthoai = r["SoDienThoai"].ToString();
-                                    if (ten.IsNullOrEmpty() || diachi.IsNullOrEmpty() || dienthoai.IsNullOrEmpty())
+                                    string ten = r["TenCaLam"].ToString();
+                                    string it= r["GioBatDau"].ToString();
+                                    string ot = r["GioKetThuc"].ToString();
+                                    float hsl = Convert.ToSingle(r["HeSoLuong"].ToString());
+                                    if (ten.IsNullOrEmpty() ||it.IsNullOrEmpty()||ot.IsNullOrEmpty()||hsl<=0 )
                                     {
                                         throw new Exception("");
                                     }
-                                    bool daTonTai = context.NhaCungCap.Any(x => x.TenNhaCungCap == ten
-                                            && x.SoDienThoai == dienthoai
-                                            && x.DiaChi == diachi);
+                                    bool daTonTai = context.CaLam.Any(x => x.TenCa ==ten
+                                         && x.GioBatDau == TimeOnly.Parse(it)
+                                         && x.GioKetThuc == TimeOnly.Parse(ot)
+                                         && x.HeSoLuong == hsl);
                                     if (daTonTai)
                                     {
-                                         throw new Exception();
+                                        throw new Exception("Trùng");
                                     }
-                                    NhaCungCap ncc = new NhaCungCap();
-                                    ncc.TenNhaCungCap = ten;
-                                    ncc.SoDienThoai = dienthoai;
-                                    ncc.DiaChi = diachi;
 
-                                    context.NhaCungCap.Add(ncc);
+
+                                    CaLam ca = new CaLam();
+                                    ca.TenCa = ten;
+                                    ca.GioBatDau=TimeOnly.Parse(it);
+                                    ca.GioKetThuc=TimeOnly.Parse(ot);
+                                    ca.HeSoLuong = hsl;
+                                    context.CaLam.Add(ca);
                                     context.SaveChanges(); // Lưu ngay từng dòng để bắt lỗi chính xác dòng đó
                                     thanhCong++;
                                 }
@@ -224,7 +258,7 @@ namespace QuanLyQuanAn.Forms
                             MessageBox.Show(string.Format("Kết quả nhập dữ liệu:\n- Thành công: {0}\n- Thất bại: {1}", thanhCong, thatBai),
                                             "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                            frmNhaCungCap_Load(sender, e);
+                            frmCaLam_Load(sender, e);
                         }
                         if (firstRow)
                             MessageBox.Show("Tập tin Excel rỗng.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
@@ -242,26 +276,28 @@ namespace QuanLyQuanAn.Forms
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Title = "Xuất dữ liệu ra tập tin Excel";
             saveFileDialog.Filter = "Tập tin Excel|*.xls;*.xlsx";
-            saveFileDialog.FileName = "NhaCungCap_" + DateTime.Now.ToShortDateString().Replace("/", "_") + ".xlsx";
+            saveFileDialog.FileName = "CaLam_" + DateTime.Now.ToShortDateString().Replace("/", "_") + ".xlsx";
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
                 try
                 {
                     DataTable table = new DataTable();
-                    table.Columns.AddRange(new DataColumn[4] {
+                    table.Columns.AddRange(new DataColumn[] {
                     new DataColumn("ID", typeof(int)),
-                    new DataColumn("TenNhaCungCap", typeof(string)),
-                    new DataColumn("SoDienThoai", typeof(string)),
-                    new DataColumn("DiaChi", typeof(string))});
-                    var nhaCungCap = context.NhaCungCap.ToList();
-                    if (nhaCungCap != null)
+                    new DataColumn("TenCaLam", typeof(string)),
+                    new DataColumn("GioBatDau", typeof(TimeOnly)),
+                    new DataColumn("GioKetThuc", typeof(TimeOnly)),
+                    new DataColumn("HeSoLuong", typeof(string))
+                    });
+                    var caLam = context.CaLam.ToList();
+                    if (caLam != null)
                     {
-                        foreach (var p in nhaCungCap)
-                            table.Rows.Add(p.ID, p.TenNhaCungCap, p.SoDienThoai, p.DiaChi);
+                        foreach (var p in caLam)
+                            table.Rows.Add(p.Id, p.TenCa,p.GioBatDau,p.GioKetThuc,p.HeSoLuong);
                     }
                     using (XLWorkbook wb = new XLWorkbook())
                     {
-                        var sheet = wb.Worksheets.Add(table, "NhaCungCap");
+                        var sheet = wb.Worksheets.Add(table, "CaLam");
                         sheet.Columns().AdjustToContents();
                         wb.SaveAs(saveFileDialog.FileName);
                         MessageBox.Show("Đã xuất dữ liệu ra tập tin Excel thành công.", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);

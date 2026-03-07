@@ -8,17 +8,19 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.IdentityModel.Tokens;
 using QuanLyQuanAn.Data;
 
 namespace QuanLyQuanAn.Forms
 {
-    public partial class frmNhaCungCap : Form
+    public partial class frmLichLam : Form
     {
         QLQADbContext context = new QLQADbContext(); // Khởi tạo biến ngữ cảnh CSDL
         bool xuLyThem = false; // Kiểm tra có nhấn vào nút Thêm hay không?
         int id;
-        public frmNhaCungCap()
+
+        public frmLichLam()
         {
             InitializeComponent();
         }
@@ -26,40 +28,63 @@ namespace QuanLyQuanAn.Forms
         {
             btnLuu.Enabled = giaTri;
             btnHuyBo.Enabled = giaTri;
-            txtHoVaTen.Enabled = giaTri;
-            txtDienThoai.Enabled = giaTri;
-            txtDiaChi.Enabled = giaTri;
+            cboCaLam.Enabled = giaTri;
+            cboNhanVien.Enabled = giaTri;
+            dtpNgayPhanCong.Enabled = giaTri;
             btnThem.Enabled = !giaTri;
             btnSua.Enabled = !giaTri;
             btnXoa.Enabled = !giaTri;
-            btnTimKiem.Enabled = !giaTri;
             btnNhap.Enabled = !giaTri;
             btnXuat.Enabled = !giaTri;
         }
-        private void frmNhaCungCap_Load(object sender, EventArgs e)
+        public void LayNhanVienVaoComboBox()
         {
+            cboNhanVien.DataSource = context.NhanVien.ToList();
+            cboNhanVien.ValueMember = "ID";
+            cboNhanVien.DisplayMember = "HoVaTen";
+        }
+        public void LayCaLamVaoComboBox()
+        {
+            cboCaLam.DataSource = context.CaLam.ToList();
+            cboCaLam.ValueMember = "ID";
+            cboCaLam.DisplayMember = "TenCa";
+        }
+
+
+        private void frmLichLam_Load(object sender, EventArgs e)
+        {
+            LayNhanVienVaoComboBox();
+            LayCaLamVaoComboBox();
             BatTatChucNang(false);
-            List<NhaCungCap> ncc = new List<NhaCungCap>();
-            ncc = context.NhaCungCap.ToList();
+            dataGridView.AutoGenerateColumns = false;
+            var listLichLam = context.LichLam.Select(ll => new
+            {
+                ll.ID,
+                ll.NhanVienID,
+                ll.CaLamID,
+                HoVaTenNhanVien = ll.NhanVien.HoVaTen,
+                Tenca = ll.CaLam.TenCa,
+                ll.NgayPhanCong
+            }).ToList();
             BindingSource bindingSource = new BindingSource();
-            bindingSource.DataSource = ncc;
-            txtHoVaTen.DataBindings.Clear();
-            txtHoVaTen.DataBindings.Add("Text", bindingSource, "TenNhaCungCap", false, DataSourceUpdateMode.Never);
-            txtDiaChi.DataBindings.Clear();
-            txtDiaChi.DataBindings.Add("Text", bindingSource, "DiaChi", false, DataSourceUpdateMode.Never);
-            txtDienThoai.DataBindings.Clear();
-            txtDienThoai.DataBindings.Add("Text", bindingSource, "SoDienThoai", false, DataSourceUpdateMode.Never);
+            bindingSource.DataSource = listLichLam;
+            cboNhanVien.DataBindings.Clear();
+            cboNhanVien.DataBindings.Add("SelectedValue", bindingSource, "NhanVienID", false, DataSourceUpdateMode.Never);
+            cboCaLam.DataBindings.Clear();
+            cboCaLam.DataBindings.Add("SelectedValue", bindingSource, "CaLamID", false, DataSourceUpdateMode.Never);
+            dtpNgayPhanCong.DataBindings.Clear();
+            dtpNgayPhanCong.DataBindings.Add("Value", bindingSource, "NgayPhanCong", false, DataSourceUpdateMode.Never);
             dataGridView.DataSource = bindingSource;
 
         }
 
         private void btnThem_Click(object sender, EventArgs e)
         {
+           
             xuLyThem = true;
             BatTatChucNang(true);
-            txtHoVaTen.Clear();
-            txtDienThoai.Clear();
-            txtDiaChi.Clear();
+            cboNhanVien.Text = "";
+            cboCaLam.Text = "";
         }
 
         private void btnSua_Click(object sender, EventArgs e)
@@ -71,77 +96,78 @@ namespace QuanLyQuanAn.Forms
 
         private void btnXoa_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("Xác nhận xóa nhà cung cấp " + txtHoVaTen.Text + "?", "Xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (MessageBox.Show("Xác nhận xóa lịch làm?", "Xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 id = Convert.ToInt32(dataGridView.CurrentRow.Cells["ID"].Value.ToString());
-                NhaCungCap ncc = context.NhaCungCap.Find(id);
-                if (ncc != null)
+                LichLam ll = context.LichLam.Find(id);
+                if (ll != null)
                 {
-                    context.NhaCungCap.Remove(ncc);
+                    context.LichLam.Remove(ll);
                 }
                 context.SaveChanges();
-                frmNhaCungCap_Load(sender, e);
+                frmLichLam_Load(sender, e);
             }
         }
 
         private void btnLuu_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtHoVaTen.Text))
-                MessageBox.Show("Vui lòng nhập họ và tên nhà cung cấp?", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            if (cboCaLam.SelectedItem == null)
+                MessageBox.Show("Vui lòng chọn ca làm việc", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            else if (cboNhanVien.SelectedItem == null)
+                MessageBox.Show("Vui lòng chọn nhân viên", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             else
             {
-                bool daTonTai = context.NhaCungCap.Any(x => x.TenNhaCungCap == txtHoVaTen.Text
-                    && x.SoDienThoai == txtDienThoai.Text
-                    && x.DiaChi == txtDiaChi.Text);
-                if (daTonTai)
+                DateTime ngay = dtpNgayPhanCong.Value;
+
+                if (ngay < DateTime.Now)
                 {
-                    MessageBox.Show("Nhà cung cấp đã tồn tại", "Lỗi");
+                    MessageBox.Show("Chỉ có thể xếp lịch cho ngày trong tương lai và lịch đột xuất cho ngày hôm nay", "Lỗi logic", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
+                int nvid = (int)cboNhanVien.SelectedValue;
+                int calamid = (int)cboCaLam.SelectedValue;
+                bool daTonTai = context.LichLam.Any(x => x.NhanVienID == nvid
+                                          && x.CaLamID == calamid
+                                          && x.NgayPhanCong == ngay);
+                if (daTonTai)
+                {
+                    MessageBox.Show("Nhân viên này đã được phân công ca này vào ngày đã chọn!", "Trùng lịch", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    return;
+                }
+
                 if (xuLyThem)
                 {
-                    NhaCungCap ncc = new NhaCungCap();
-                    ncc.TenNhaCungCap = txtHoVaTen.Text;
-                    ncc.SoDienThoai = txtDienThoai.Text;
-                    ncc.DiaChi = txtDiaChi.Text;
-                    context.NhaCungCap.Add(ncc);
+                    LichLam ll = new LichLam();
+                    ll.CaLamID = (int)cboCaLam.SelectedValue;
+                    ll.NhanVienID = (int)cboNhanVien.SelectedValue;
+                    ll.NgayPhanCong = dtpNgayPhanCong.Value;
+                    context.LichLam.Add(ll);
                     context.SaveChanges();
                 }
                 else
                 {
-                    NhaCungCap ncc = context.NhaCungCap.Find(id);
-                    if (ncc != null)
+                    LichLam ll = context.LichLam.Find(id);
+                    if (ll != null)
                     {
-                        ncc.TenNhaCungCap = txtHoVaTen.Text;
-                        ncc.SoDienThoai = txtDienThoai.Text;
-                        ncc.DiaChi = txtDiaChi.Text;
-                        context.NhaCungCap.Update(ncc);
+                        ll.CaLamID = (int)cboCaLam.SelectedValue;
+                        ll.NhanVienID = (int)cboNhanVien.SelectedValue;
+                        ll.NgayPhanCong = dtpNgayPhanCong.Value;
+                        context.LichLam.Update(ll);
                         context.SaveChanges();
                     }
                 }
-                frmNhaCungCap_Load(sender, e);
+                frmLichLam_Load(sender, e);
             }
         }
 
         private void btnHuyBo_Click(object sender, EventArgs e)
         {
-            frmNhaCungCap_Load(sender, e);
+            frmLichLam_Load(sender, e);
         }
 
         private void btnThoat_Click(object sender, EventArgs e)
         {
             this.Close();
-        }
-
-        private void btnTimKiem_Click(object sender, EventArgs e)
-        {
-            if (string.IsNullOrWhiteSpace(txtHoVaTen.Text))
-                MessageBox.Show("Vui lòng nhập họ và tên nhà cung cấp?", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            else
-            {
-                dataGridView.DataSource = context.NhaCungCap.Where(ncc => ncc.TenNhaCungCap.Contains(txtHoVaTen.Text)).ToList();
-                BatTatChucNang(true);
-            }
         }
 
         private void btnNhap_Click(object sender, EventArgs e)
@@ -190,33 +216,38 @@ namespace QuanLyQuanAn.Forms
                             {
                                 try
                                 {
-                                    string ten = r["TenNhaCungCap"].ToString();
-                                    string diachi = r["DiaChi"].ToString();
-                                    string dienthoai = r["SoDienThoai"].ToString();
-                                    if (ten.IsNullOrEmpty() || diachi.IsNullOrEmpty() || dienthoai.IsNullOrEmpty())
+                                    string ca = r["TenCa"].ToString();
+                                    var caid = context.CaLam.FirstOrDefault(r => r.TenCa == ca);
+                                    string nv = r["NhanVien"].ToString();
+                                    var nvid = context.NhanVien.FirstOrDefault(r => r.HoVaTen == nv);
+
+                                    DateTime d = DateTime.Parse(r["NgayPhanCong"].ToString());
+                                    if (ca.IsNullOrEmpty() || nv.IsNullOrEmpty() || d == null || caid == null || nvid == null)
                                     {
                                         throw new Exception("");
                                     }
-                                    bool daTonTai = context.NhaCungCap.Any(x => x.TenNhaCungCap == ten
-                                            && x.SoDienThoai == dienthoai
-                                            && x.DiaChi == diachi);
+                                    bool daTonTai = context.LichLam.Any(x => x.NhanVienID == nvid.ID
+                                          && x.CaLamID == caid.Id
+                                         && x.NgayPhanCong.Date == d.Date);
                                     if (daTonTai)
                                     {
-                                         throw new Exception();
-                                    }
-                                    NhaCungCap ncc = new NhaCungCap();
-                                    ncc.TenNhaCungCap = ten;
-                                    ncc.SoDienThoai = dienthoai;
-                                    ncc.DiaChi = diachi;
+                                        throw new Exception("Trùng");
 
-                                    context.NhaCungCap.Add(ncc);
+                                    }
+                                    LichLam ll = new LichLam();
+                                    ll.NhanVienID = nvid.ID;
+                                    ll.CaLamID = caid.Id;
+                                    ll.NgayPhanCong = d;
+                                    context.LichLam.Add(ll);
                                     context.SaveChanges(); // Lưu ngay từng dòng để bắt lỗi chính xác dòng đó
                                     thanhCong++;
                                 }
-                                catch
+                                catch(Exception ex) 
                                 {
                                     // Nếu dòng này lỗi, rollback entry đó và tăng biến thất bại
                                     thatBai++;
+                                    MessageBox.Show(ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+
                                     // Tùy chọn: Log lỗi hoặc bỏ qua để tiếp tục dòng sau
                                 }
                             }
@@ -224,7 +255,7 @@ namespace QuanLyQuanAn.Forms
                             MessageBox.Show(string.Format("Kết quả nhập dữ liệu:\n- Thành công: {0}\n- Thất bại: {1}", thanhCong, thatBai),
                                             "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                            frmNhaCungCap_Load(sender, e);
+                            frmLichLam_Load(sender, e);
                         }
                         if (firstRow)
                             MessageBox.Show("Tập tin Excel rỗng.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
@@ -242,26 +273,31 @@ namespace QuanLyQuanAn.Forms
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Title = "Xuất dữ liệu ra tập tin Excel";
             saveFileDialog.Filter = "Tập tin Excel|*.xls;*.xlsx";
-            saveFileDialog.FileName = "NhaCungCap_" + DateTime.Now.ToShortDateString().Replace("/", "_") + ".xlsx";
+            saveFileDialog.FileName = "LichLam_" + DateTime.Now.ToShortDateString().Replace("/", "_") + ".xlsx";
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
                 try
                 {
                     DataTable table = new DataTable();
-                    table.Columns.AddRange(new DataColumn[4] {
+                    table.Columns.AddRange(new DataColumn[] {
                     new DataColumn("ID", typeof(int)),
-                    new DataColumn("TenNhaCungCap", typeof(string)),
-                    new DataColumn("SoDienThoai", typeof(string)),
-                    new DataColumn("DiaChi", typeof(string))});
-                    var nhaCungCap = context.NhaCungCap.ToList();
-                    if (nhaCungCap != null)
+                    new DataColumn("TenCa", typeof(string)),
+                    new DataColumn("NhanVien", typeof(String)),
+                    new DataColumn("NgayPhanCong", typeof(DateTime)),
+                    });
+                    var lichLam = context.LichLam.ToList();
+                    if (lichLam != null)
                     {
-                        foreach (var p in nhaCungCap)
-                            table.Rows.Add(p.ID, p.TenNhaCungCap, p.SoDienThoai, p.DiaChi);
+                        foreach (var p in lichLam)
+                        {
+                            var nv=context.NhanVien.FirstOrDefault(r=>r.ID==p.NhanVienID);
+                            var ca=context.CaLam.FirstOrDefault(r=>r.Id==p.CaLamID);
+                            table.Rows.Add(p.ID, ca.TenCa, nv.HoVaTen,p.NgayPhanCong);
+                        }
                     }
                     using (XLWorkbook wb = new XLWorkbook())
                     {
-                        var sheet = wb.Worksheets.Add(table, "NhaCungCap");
+                        var sheet = wb.Worksheets.Add(table, "LichLam");
                         sheet.Columns().AdjustToContents();
                         wb.SaveAs(saveFileDialog.FileName);
                         MessageBox.Show("Đã xuất dữ liệu ra tập tin Excel thành công.", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);

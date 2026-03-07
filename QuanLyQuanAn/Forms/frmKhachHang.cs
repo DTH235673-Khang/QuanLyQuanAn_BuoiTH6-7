@@ -89,6 +89,15 @@ namespace QuanLyQuanAn.Forms
                 MessageBox.Show("Vui lòng nhập họ và tên khách hàng?", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             else
             {
+                bool daTonTai = context.KhachHang.Any(x => x.HoVaTen == txtHoVaTen.Text
+                    && x.DienThoai == txtDienThoai.Text
+                    && x.DiaChi == txtDiaChi.Text);
+                if (daTonTai)
+                {
+                    MessageBox.Show("Khách hàng đã tồn tại", "Lỗi");
+                    return;
+                }
+
                 if (xuLyThem)
                 {
                     KhachHang kh = new KhachHang();
@@ -187,6 +196,13 @@ namespace QuanLyQuanAn.Forms
                                     if (ten.IsNullOrEmpty() || diachi.IsNullOrEmpty() || dienthoai.IsNullOrEmpty())
                                     {
                                         throw new Exception("");
+                                    }
+                                    bool daTonTai = context.KhachHang.Any(x => x.HoVaTen == ten
+                                         && x.DienThoai == dienthoai
+                                         && x.DiaChi == diachi);
+                                    if (daTonTai)
+                                    {
+                                      throw new Exception();
                                     }
                                     KhachHang kh = new KhachHang();
                                     kh.HoVaTen = ten;

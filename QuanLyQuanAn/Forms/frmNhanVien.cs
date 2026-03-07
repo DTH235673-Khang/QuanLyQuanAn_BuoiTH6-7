@@ -62,9 +62,8 @@ namespace QuanLyQuanAn.Forms
                 nv.MatKhau,
                 nv.ChucVuID,
                 nv.QuyenHan,
-                ChucVu = nv.ChucVu.TenChucVu 
+                ChucVu = nv.ChucVu.TenChucVu
             }).ToList();
-            
             BindingSource bindingSource = new BindingSource();
             bindingSource.DataSource = listNhanVien;
             txtHoVaTen.DataBindings.Clear();
@@ -76,7 +75,7 @@ namespace QuanLyQuanAn.Forms
             txtTenDangNhap.DataBindings.Clear();
             txtTenDangNhap.DataBindings.Add("Text", bindingSource, "TenDangNhap", false, DataSourceUpdateMode.Never);
             cboChucVu.DataBindings.Clear();
-            cboChucVu.DataBindings.Add("SelectedValue", bindingSource, "ChucVuID", true, DataSourceUpdateMode.Never);
+            cboChucVu.DataBindings.Add("SelectedValue", bindingSource, "ChucVuID", false, DataSourceUpdateMode.Never);
             dataGridView.DataSource = bindingSource;
         }
 
@@ -125,6 +124,14 @@ namespace QuanLyQuanAn.Forms
                 MessageBox.Show("Vui lòng chọn chức vụ cho nhân viên?", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             else
             {
+                bool daTonTai = context.NhanVien.Any(x => x.HoVaTen == txtHoVaTen.Text
+                   && x.DienThoai == txtDienThoai.Text
+                   && x.DiaChi == txtDiaChi.Text);
+                if (daTonTai)
+                {
+                    MessageBox.Show("Nhân viên đã tồn tại", "Lỗi");
+                    return;
+                }
                 if (xuLyThem)
                 {
                     if (string.IsNullOrWhiteSpace(txtMatKhau.Text))
@@ -256,6 +263,13 @@ namespace QuanLyQuanAn.Forms
                                     {
                                         throw new Exception("");
                                     }
+                                    bool daTonTai = context.NhanVien.Any(x => x.HoVaTen == ten
+                                        && x.DienThoai == dienthoai
+                                        && x.DiaChi == diachi);
+                                    if (daTonTai)
+                                    {
+                                        throw new Exception();
+                                    }
                                     NhanVien nv = new NhanVien();
                                     nv.HoVaTen = ten;
                                     nv.DienThoai = dienthoai;
@@ -337,7 +351,5 @@ namespace QuanLyQuanAn.Forms
                 }
             }
         }
-
-      
     }
 }

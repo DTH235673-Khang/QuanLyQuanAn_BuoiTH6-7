@@ -78,6 +78,14 @@ namespace QuanLyQuanAn.Forms
                 MessageBox.Show("Vui lòng nhập tên đơn vị tính!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             else
             {
+                bool daTonTai = context.DonViTinh.Any(x => x.TenDonViTinh == txtTenDonViTinh.Text);
+                   
+                if (daTonTai)
+                {
+                    MessageBox.Show("Đơn vị tính đã tồn tại", "Lỗi");
+                    return;
+                }
+
                 if (xuLyThem)
                 {
                     DonViTinh dvt = new DonViTinh();
@@ -162,7 +170,13 @@ namespace QuanLyQuanAn.Forms
                             if(ten.IsNullOrEmpty())
                             {
                                 throw new Exception("");
-                            }    
+                            }
+                            bool daTonTai = context.DonViTinh.Any(x => x.TenDonViTinh == ten);
+
+                            if (daTonTai)
+                            {
+                               throw new Exception();
+                            }
                             DonViTinh dvt = new DonViTinh();
                             dvt.TenDonViTinh = ten;
                             

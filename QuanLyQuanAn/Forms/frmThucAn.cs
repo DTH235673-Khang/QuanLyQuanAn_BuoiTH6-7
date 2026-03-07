@@ -192,6 +192,16 @@ namespace QuanLyQuanAn.Forms
                 MessageBox.Show("Đơn giá phải lớn hơn 0.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             else
             {
+                bool daTonTai = context.ThucAn.Any(x => x.TenThucAn == txtTenMonAn.Text
+                   && x.Gia == numDonGia.Value
+                   && x.MoTa==txtMoTa.Text
+                   && x.DanhMucID == (int)cboPhanLoai.SelectedValue
+                   && x.DonViTinhID== (int)cboDonViTinh.SelectedValue);
+                if (daTonTai)
+                {
+                    MessageBox.Show("Món ăn đã tồn tại", "Lỗi");
+                    return;
+                }
                 if (xuLyThem)
                 {
                     ThucAn t = new ThucAn();
@@ -495,6 +505,15 @@ namespace QuanLyQuanAn.Forms
                                     if (ten.IsNullOrEmpty()|| d<=0 || dm_==null||dvt_==null)
                                     {
                                         throw new Exception("");
+                                    }
+                                    bool daTonTai = context.ThucAn.Any(x => x.TenThucAn == ten
+                                      && x.Gia == d
+                                      && x.MoTa == r["MoTa"].ToString()
+                                      && x.DanhMucID == dm_.Id
+                                      && x.DonViTinhID == dvt_.Id);
+                                    if (daTonTai)
+                                    {
+                                       throw new Exception();
                                     }
                                     ThucAn t = new ThucAn();
                                     t.DanhMucID = dm_.Id;

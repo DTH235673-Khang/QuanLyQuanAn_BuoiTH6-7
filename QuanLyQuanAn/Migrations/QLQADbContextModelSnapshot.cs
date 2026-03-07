@@ -290,8 +290,8 @@ namespace QuanLyQuanAn.Migrations
                     b.Property<int>("CaLamID")
                         .HasColumnType("int");
 
-                    b.Property<DateOnly>("NgayPhanCong")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("NgayPhanCong")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("NhanVienID")
                         .HasColumnType("int");

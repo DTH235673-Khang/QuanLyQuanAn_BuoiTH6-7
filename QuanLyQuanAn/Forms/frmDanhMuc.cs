@@ -64,6 +64,13 @@ namespace QuanLyQuanAn.Forms
                 MessageBox.Show("Vui lòng nhập tên loại sản phẩm?", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             else
             {
+                bool daTonTai = context.DanhMuc.Any(x => x.TenDanhMuc == txtTenDanhMuc.Text);
+                if (daTonTai)
+                {
+                    MessageBox.Show("Danh mục đã tồn tại", "Lỗi");
+                    return;
+                }
+
                 if (xuLyThem)
                 {
                     DanhMuc dam = new DanhMuc();
@@ -160,7 +167,12 @@ namespace QuanLyQuanAn.Forms
                                     if(ten.IsNullOrEmpty())
                                     {
                                         throw new Exception("");
-                                    }    
+                                    }
+                                    bool daTonTai = context.DanhMuc.Any(x => x.TenDanhMuc == ten);
+                                    if (daTonTai)
+                                    {
+                                        throw new Exception("Trùng");
+                                    }
                                     DanhMuc dm = new DanhMuc();
                                     dm.TenDanhMuc = ten;
 

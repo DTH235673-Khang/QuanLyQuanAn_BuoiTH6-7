@@ -11,7 +11,7 @@ namespace QuanLyQuanAn.Data
         public int ID { get; set; }
         public int NhanVienID { get; set; }
         public int CaLamID { get; set; }
-        public DateOnly NgayPhanCong {  get; set; }
+        public DateTime NgayPhanCong {  get; set; }
         public virtual NhanVien NhanVien { get; set; } = null;
         public virtual CaLam CaLam { get; set; } = null;
     }
