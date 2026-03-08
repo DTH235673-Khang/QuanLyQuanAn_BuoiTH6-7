@@ -66,9 +66,8 @@ namespace QuanLyQuanAn.Migrations
                     b.Property<int>("NhanVienID")
                         .HasColumnType("int");
 
-                    b.Property<string>("TrangThai")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<float>("SoGioLam")
+                        .HasColumnType("real");
 
                     b.HasKey("ID");
 

@@ -13,7 +13,7 @@ namespace QuanLyQuanAn.Data
         public DateOnly Ngay {  get; set; }
         public DateTime GioVaoThucTe { get; set; }
         public DateTime GioRaThucTe { get; set; }
-        public string TrangThai { get; set; }
+        public float SoGioLam { get; set; }
         public virtual NhanVien NhanVien { get; set; } = null;
     }
 }

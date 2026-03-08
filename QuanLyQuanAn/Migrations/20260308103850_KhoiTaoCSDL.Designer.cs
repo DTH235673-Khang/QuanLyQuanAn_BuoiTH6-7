@@ -12,8 +12,8 @@ using QuanLyQuanAn.Data;
 namespace QuanLyQuanAn.Migrations
 {
     [DbContext(typeof(QLQADbContext))]
-    [Migration("20260307131643_KhoitaoCSDL")]
-    partial class KhoitaoCSDL
+    [Migration("20260308103850_KhoiTaoCSDL")]
+    partial class KhoiTaoCSDL
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -69,9 +69,8 @@ namespace QuanLyQuanAn.Migrations
                     b.Property<int>("NhanVienID")
                         .HasColumnType("int");
 
-                    b.Property<string>("TrangThai")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<float>("SoGioLam")
+                        .HasColumnType("real");
 
                     b.HasKey("ID");
 

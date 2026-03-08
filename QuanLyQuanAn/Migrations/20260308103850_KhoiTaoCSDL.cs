@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace QuanLyQuanAn.Migrations
 {
     /// <inheritdoc />
-    public partial class KhoitaoCSDL : Migration
+    public partial class KhoiTaoCSDL : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -194,7 +194,7 @@ namespace QuanLyQuanAn.Migrations
                     Ngay = table.Column<DateOnly>(type: "date", nullable: false),
                     GioVaoThucTe = table.Column<DateTime>(type: "datetime2", nullable: false),
                     GioRaThucTe = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TrangThai = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    SoGioLam = table.Column<float>(type: "real", nullable: false)
                 },
                 constraints: table =>
                 {
