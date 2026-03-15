@@ -13,7 +13,6 @@ namespace QuanLyQuanAn.Data
     {
         public DbSet<Ban> Ban { get; set; }
         public DbSet<BangCong> BangCong { get; set; }
-        public DbSet<BangLuong> BangLuong { get; set; }
         public DbSet<CaLam> CaLam { get; set; }
         public DbSet<ChucVu> ChucVu { get; set; }
         public DbSet<DanhMuc> DanhMuc { get; set; }
