@@ -76,36 +76,6 @@ namespace QuanLyQuanAn.Migrations
                     b.ToTable("BangCong");
                 });
 
-            modelBuilder.Entity("QuanLyQuanAn.Data.BangLuong", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
-                    b.Property<int>("Nam")
-                        .HasColumnType("int");
-
-                    b.Property<int>("NhanVienID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Thang")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("TongGio")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("TongLuong")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("NhanVienID");
-
-                    b.ToTable("BangLuong");
-                });
-
             modelBuilder.Entity("QuanLyQuanAn.Data.CaLam", b =>
                 {
                     b.Property<int>("Id")
@@ -511,17 +481,6 @@ namespace QuanLyQuanAn.Migrations
                     b.Navigation("NhanVien");
                 });
 
-            modelBuilder.Entity("QuanLyQuanAn.Data.BangLuong", b =>
-                {
-                    b.HasOne("QuanLyQuanAn.Data.NhanVien", "NhanVien")
-                        .WithMany("BangLuong")
-                        .HasForeignKey("NhanVienID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("NhanVien");
-                });
-
             modelBuilder.Entity("QuanLyQuanAn.Data.HoaDon", b =>
                 {
                     b.HasOne("QuanLyQuanAn.Data.Ban", "Ban")
@@ -703,8 +662,6 @@ namespace QuanLyQuanAn.Migrations
             modelBuilder.Entity("QuanLyQuanAn.Data.NhanVien", b =>
                 {
                     b.Navigation("BangCong");
-
-                    b.Navigation("BangLuong");
 
                     b.Navigation("HoaDon");
 

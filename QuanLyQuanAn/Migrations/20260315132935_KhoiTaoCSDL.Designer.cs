@@ -12,8 +12,8 @@ using QuanLyQuanAn.Data;
 namespace QuanLyQuanAn.Migrations
 {
     [DbContext(typeof(QLQADbContext))]
-    [Migration("20260314150115_KhoitaoCSDL")]
-    partial class KhoitaoCSDL
+    [Migration("20260315132935_KhoiTaoCSDL")]
+    partial class KhoiTaoCSDL
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -77,36 +77,6 @@ namespace QuanLyQuanAn.Migrations
                     b.HasIndex("NhanVienID");
 
                     b.ToTable("BangCong");
-                });
-
-            modelBuilder.Entity("QuanLyQuanAn.Data.BangLuong", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
-                    b.Property<int>("Nam")
-                        .HasColumnType("int");
-
-                    b.Property<int>("NhanVienID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Thang")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("TongGio")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("TongLuong")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("NhanVienID");
-
-                    b.ToTable("BangLuong");
                 });
 
             modelBuilder.Entity("QuanLyQuanAn.Data.CaLam", b =>
@@ -514,17 +484,6 @@ namespace QuanLyQuanAn.Migrations
                     b.Navigation("NhanVien");
                 });
 
-            modelBuilder.Entity("QuanLyQuanAn.Data.BangLuong", b =>
-                {
-                    b.HasOne("QuanLyQuanAn.Data.NhanVien", "NhanVien")
-                        .WithMany("BangLuong")
-                        .HasForeignKey("NhanVienID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("NhanVien");
-                });
-
             modelBuilder.Entity("QuanLyQuanAn.Data.HoaDon", b =>
                 {
                     b.HasOne("QuanLyQuanAn.Data.Ban", "Ban")
@@ -706,8 +665,6 @@ namespace QuanLyQuanAn.Migrations
             modelBuilder.Entity("QuanLyQuanAn.Data.NhanVien", b =>
                 {
                     b.Navigation("BangCong");
-
-                    b.Navigation("BangLuong");
 
                     b.Navigation("HoaDon");
 

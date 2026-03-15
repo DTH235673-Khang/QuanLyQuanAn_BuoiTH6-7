@@ -21,7 +21,6 @@ namespace QuanLyQuanAn.Data
         public virtual ObservableCollectionListSource<PhieuNhapKho> PhieuNhapKho { get; } = new();
         public virtual ObservableCollectionListSource<LichLam> LichLam { get; } = new();
         public virtual ObservableCollectionListSource<BangCong> BangCong { get; } = new();
-        public virtual ObservableCollectionListSource<BangLuong> BangLuong { get; } = new();
 
         public virtual ChucVu ChucVu { get; set; } = null!;
 

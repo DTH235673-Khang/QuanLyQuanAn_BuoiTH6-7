@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace QuanLyQuanAn.Migrations
 {
     /// <inheritdoc />
-    public partial class KhoitaoCSDL : Migration
+    public partial class KhoiTaoCSDL : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -208,29 +208,6 @@ namespace QuanLyQuanAn.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BangLuong",
-                columns: table => new
-                {
-                    ID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    NhanVienID = table.Column<int>(type: "int", nullable: false),
-                    Thang = table.Column<int>(type: "int", nullable: false),
-                    Nam = table.Column<int>(type: "int", nullable: false),
-                    TongGio = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    TongLuong = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_BangLuong", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_BangLuong_NhanVien_NhanVienID",
-                        column: x => x.NhanVienID,
-                        principalTable: "NhanVien",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "HoaDon",
                 columns: table => new
                 {
@@ -386,11 +363,6 @@ namespace QuanLyQuanAn.Migrations
                 column: "NhanVienID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BangLuong_NhanVienID",
-                table: "BangLuong",
-                column: "NhanVienID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_HoaDon_BanID",
                 table: "HoaDon",
                 column: "BanID");
@@ -466,9 +438,6 @@ namespace QuanLyQuanAn.Migrations
         {
             migrationBuilder.DropTable(
                 name: "BangCong");
-
-            migrationBuilder.DropTable(
-                name: "BangLuong");
 
             migrationBuilder.DropTable(
                 name: "HoaDon_ChiTiet");
